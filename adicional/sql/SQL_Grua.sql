@@ -100,9 +100,10 @@ DELETE FROM `usuario`;
 
 -- Insertar datos en la tabla gestion_grua.usuario
 INSERT INTO `usuario` (`id`, `email`, `password`, `deleted_at`, `rol`) VALUES
-(1, 'user1@example.com', 'password1', NULL, 'admin'),
-(2, 'user2@example.com', 'password2', NULL, 'user'),
-(3, 'user3@example.com', 'password3', NULL, 'guest');
+(1, 'user1@example.com', 'pwd1', NULL, 'user'),
+(2, 'user2@example.com', 'pwd2', NULL, 'user'),
+(3, 'user3@example.com', 'pwd3', NULL, 'user'),
+(4, 'admin@admin.com', 'pwd', NULL, 'admin');
 
 -- Volcando estructura para tabla gestion_grua.vehiculos
 CREATE TABLE IF NOT EXISTS `vehiculos` (
