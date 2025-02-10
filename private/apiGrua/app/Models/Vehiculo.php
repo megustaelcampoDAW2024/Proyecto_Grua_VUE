@@ -10,4 +10,14 @@ class Vehiculo extends Model
     protected $primaryKey = 'id';
     protected $guarded = [];
     public $timestamps = false;
+
+    public function retiradas()
+    {
+        return $this->hasOne(Retirada::class, 'id_vehiculos', 'id');
+    }
+
+    public function index()
+    {
+        return self::all()->toJson();
+    }
 }

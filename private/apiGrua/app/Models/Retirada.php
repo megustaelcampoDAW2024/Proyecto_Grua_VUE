@@ -10,4 +10,19 @@ class Retirada extends Model
     protected $primaryKey = 'id';
     protected $guarded = [];
     public $timestamps = false;
+
+    public function vehiculo()
+    {
+        return $this->belongsTo(Vehiculo::class, 'id_vehiculos', 'id');
+    }
+
+    public function tarifa()
+    {
+        return $this->belongsTo(Tarifa::class, 'id_tarifa', 'id');
+    }
+
+    public function index()
+    {
+        return self::all()->toJson();
+    }
 }

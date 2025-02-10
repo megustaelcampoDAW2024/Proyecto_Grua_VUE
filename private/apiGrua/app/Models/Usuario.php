@@ -12,4 +12,15 @@ class Usuario extends Model
     protected $primaryKey = 'id';
     protected $guarded = [];
     public $timestamps = false;
+
+    
+    public function logs()
+    {
+        return $this->hasMany(Log::class, 'usuario_id', 'id');
+    }
+    
+    public function index()
+    {
+        return self::all()->toJson();
+    }
 }
