@@ -13,21 +13,83 @@
     </head>
     <body>
         <div id="app">
-            <div v-if="!loggedIn">
-                <form @submit.prevent="login" class="container mt-5">
-                    <div class="form-group">
-                        <label for="email">Email:</label>
-                        <input type="text" id="email" v-model="email" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password:</label>
-                        <input type="password" id="password" v-model="password" class="form-control">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Login</button>
-                </form>
+            <div v-if="!loggedIn" class="container mt-5">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="text" id="email" v-model="email_input" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" v-model="password_input" class="form-control">
+                </div>
+                <button type="submit" @click="login" class="btn btn-primary">Login</button>
             </div>
             <div v-else>
-                {{mensaje}}
+                <div id="plantilla">
+                    <!-- NAV -->
+                    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+                        <ul class="navbar-nav mr-auto">
+                            <li class="nav-item" v-if="isAdmin">
+                                <button class="nav-link btn btn-link" @click="pantallaListaVehiculos">Vehículos</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link btn btn-link" @click="pantallaListaRetiradas">Retiradas</button>
+                            </li>
+                            <li class="nav-item" v-if="isAdmin">
+                                <button class="nav-link btn btn-link" @click="pantallaUsuarios">Gestión Usuarios</button>
+                            </li>
+                        </ul>
+                        <div>
+                            <span class="mr-1">{{usuario.email}} | Rol: {{usuario.rol}} |</span>
+                            <button class="btn btn-danger" @click="logout">LogOut</button>
+                        </div>
+                    </nav>
+
+                    <!-- SECTION -->
+                    <section>
+                        <!-- INICIO -->
+                        <article v-if="pantalla == 'inicio'">
+                            <h2>Bienvenido a la gestión de la Grua Municipal</h2>
+                        </article>
+
+                        <!-- LISTADO VEHICULOS -->
+                        <article v-else-if="pantalla == 'lista.vehiculo'">
+                            <h2>lista-vehiculos</h2>
+                        </article>
+                        
+                        <!-- LISTADO RETIRADAS -->
+                        <article v-else-if="pantalla == 'lista.retiradas'">
+                            <h2>lista-retiradas</h2>
+                        </article>
+
+                        <!-- GESTION USUARIOS -->
+                        <article v-else-if="pantalla == 'usuarios'">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>E-Mail</th>
+                                        <th>Password</th>
+                                        <th>Rol</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="usuario in lista_usuarios">
+                                        <td>{{lista_usuarios.id}}</td>
+                                        <td>{{lista_usuarios.email}}</td>
+                                        <td>{{lista_usuarios.password}}</td>
+                                        <td>{{lista_usuarios.rol}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </article>
+                    </section>
+
+                    <!-- FOOTER -->
+                    <footer class="mt-4">
+                        <p>&copy; 2025 Grua Municipal. All rights reserved.</p>
+                    </footer>
+                </div>
             </div>
         </div>
     </body>
