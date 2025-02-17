@@ -38,26 +38,34 @@ let app = new Vue({
             this.email_input = '';
             this.password_input = '';
         },
+
+        //Vehículos
         pantallaListaVehiculos() {
-            cargarListaUsuarios();
             this.pantalla = 'lista.vehiculo';
+        },
+        pantallaListaRetiradas() {
+            this.pantalla = 'lista.retiradas';
+        },
+        
+        //Usuarios
+        pantallaUsuarios() {
+            console.log("Hola");
+            this.cargarListaUsuarios();
+            this.pantalla = 'usuarios'; 
         },
         cargarListaUsuarios() {
             fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/usuarios')
                 .then(response => response.json())
                 .then(users => {
+                    console.log("Hola" + this.lista_usuarios);
                     this.lista_usuarios = users;
+                    console.log("Hola" + this.lista_usuarios);
+                    
                 })
                 .catch(error => {
                     console.error('Error fetching users:', error);
                     alert('Error fetching users. Please try again later.');
                 });
-        },
-        pantallaListaRetiradas() {
-            this.pantalla = 'lista.retiradas';
-        },
-        pantallaUsuarios() {
-            this.pantalla = 'usuarios';
         },
     }
 });

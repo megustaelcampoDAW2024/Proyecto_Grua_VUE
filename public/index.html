@@ -64,8 +64,8 @@
 
                         <!-- GESTION USUARIOS -->
                         <article v-else-if="pantalla == 'usuarios'">
-                            <table>
-                                <thead>
+                            <table class="table table-striped table-bordered">
+                                <thead class="thead-dark">
                                     <tr>
                                         <th>ID</th>
                                         <th>E-Mail</th>
@@ -75,10 +75,10 @@
                                 </thead>
                                 <tbody>
                                     <tr v-for="usuario in lista_usuarios">
-                                        <td>{{lista_usuarios.id}}</td>
-                                        <td>{{lista_usuarios.email}}</td>
-                                        <td>{{lista_usuarios.password}}</td>
-                                        <td>{{lista_usuarios.rol}}</td>
+                                        <td>{{usuario.id}}</td>
+                                        <td>{{usuario.email}}</td>
+                                        <td>{{usuario.password}}</td>
+                                        <td>{{usuario.rol}}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -86,8 +86,8 @@
                     </section>
 
                     <!-- FOOTER -->
-                    <footer class="mt-4">
-                        <p>&copy; 2025 Grua Municipal. All rights reserved.</p>
+                    <footer class="mt-4 bg-light text-center py-3">
+                        <p class="mb-0">&copy; 2025 Grua Municipal. All rights reserved.</p>
                     </footer>
                 </div>
             </div>
