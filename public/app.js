@@ -7,11 +7,19 @@ let app = new Vue({
         password_input: '',
         usuario: "",            // Variable para guardar el usuario logeado
         pantalla: 'inicio',     // Variable para controlar la pantalla que se muestra
-        lista_usuarios: []      // Variable para guardar la lista de usuarios
+        accion: '',
+
+        //USUARIO
+        lista_usuarios: [],      // Variable para guardar la lista de usuarios
+        usuario_selected: {
+            email: '',
+            password: '',
+            rol: ''
+        },
     },
     methods: {
         login() {
-            fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/usuarios')
+            fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/usuarios/index')
                 .then(response => response.json())
                 .then(users => {
                     const user = users.find(user => user.email === this.email_input && user.password === this.password_input);
@@ -38,34 +46,81 @@ let app = new Vue({
             this.email_input = '';
             this.password_input = '';
         },
+        ejecutar(pantalla, accion, id) {
 
-        //Vehículos
-        pantallaListaVehiculos() {
-            this.pantalla = 'lista.vehiculo';
+            // Usuario
+            if (pantalla === 'usuario') 
+            {
+                if (accion === 'index') {
+                    this.usuario_index();
+                }else if (accion === 'create') {
+                    // this.usuario_create();
+                }else if (accion === 'edit') {
+                    // this.usuario_edit();
+                }else if (accion === 'delete') {
+                    this.usuario_selected = this.lista_usuarios.find(user => user.id === id);
+                }
+            }
+
+            // Vehiculo
+            else if (pantalla === 'vehiculo') 
+            {
+                if (accion === 'index') {
+                    // this.vehiculo_index();
+                }else if (accion === 'create') {
+                    // this.vehiculo_create();
+                }else if (accion === 'edit') {
+                    // this.vehiculo_edit();
+                }else if (accion === 'delete') {
+                    // this.vehiculo_delete();
+                }
+            }
+            
+            // Retirada
+            else if (pantalla === 'retirada')
+            {
+                if (accion === 'index') {
+                    // this.retirada_index();
+                }else if (accion === 'create') {
+                    // this.retirada_create();
+                }else if (accion === 'edit') {
+                    // this.retirada_edit();
+                }else if (accion === 'delete') {
+                    // this.retirada_delete();
+                }
+            }
+
+            console.log('Pantalla: ' + pantalla + ' | Accion: ' + accion + ' | id: ' + id);
+            
+            this.pantalla = pantalla;
+            this.accion = accion;
         },
-        pantallaListaRetiradas() {
-            this.pantalla = 'lista.retiradas';
+
+        // FUNCIONES USUARIOS
+        async usuario_index() {
+            try {
+                const response = await fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/usuarios/index');
+                const users = await response.json();
+                this.lista_usuarios = users;
+            } catch (error) {
+                console.error('Error fetching users:', error);
+                alert('Error fetching users. Please try again later.');
+            }
         },
-        
-        //Usuarios
-        pantallaUsuarios() {
-            console.log("Hola");
-            this.cargarListaUsuarios();
-            this.pantalla = 'usuarios'; 
-        },
-        cargarListaUsuarios() {
-            fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/usuarios')
-                .then(response => response.json())
-                .then(users => {
-                    console.log("Hola" + this.lista_usuarios);
-                    this.lista_usuarios = users;
-                    console.log("Hola" + this.lista_usuarios);
-                    
-                })
-                .catch(error => {
-                    console.error('Error fetching users:', error);
-                    alert('Error fetching users. Please try again later.');
+        async usuario_delete() {
+            try {
+                const response = await fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/usuarios/delete/' + this.usuario_selected.id, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
                 });
+                console.log(await response.json());                
+                this.ejecutar('usuario', 'index');
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                alert('Error deleting user. Please try again later.');
+            }
         },
     }
 });

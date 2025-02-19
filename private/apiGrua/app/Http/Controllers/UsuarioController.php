@@ -37,7 +37,8 @@ class UsuarioController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $usuario = Usuario::find($id);
+        return $usuario->toJson();
     }
 
     /**
@@ -61,6 +62,13 @@ class UsuarioController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $usuario = Usuario::find($id);
+
+        if ($usuario) {
+            $usuario->delete();
+            return response()->json(['message' => 'Usuario deleted successfully.'], 200);
+        } else {
+            return response()->json(['message' => 'Usuario not found.'], 404);
+        }
     }
 }

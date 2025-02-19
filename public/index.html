@@ -30,13 +30,13 @@
                     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
                         <ul class="navbar-nav mr-auto">
                             <li class="nav-item" v-if="isAdmin">
-                                <button class="nav-link btn btn-link" @click="pantallaListaVehiculos">Vehículos</button>
+                                <button class="nav-link btn btn-link" @click="ejecutar('vehiculo', 'index')">Vehículos</button>
                             </li>
                             <li class="nav-item">
-                                <button class="nav-link btn btn-link" @click="pantallaListaRetiradas">Retiradas</button>
+                                <button class="nav-link btn btn-link" @click="ejecutar('retirada', 'index')">Retiradas</button>
                             </li>
                             <li class="nav-item" v-if="isAdmin">
-                                <button class="nav-link btn btn-link" @click="pantallaUsuarios">Gestión Usuarios</button>
+                                <button class="nav-link btn btn-link" @click="ejecutar('usuario', 'index')">Gestión Usuarios</button>
                             </li>
                         </ul>
                         <div>
@@ -47,41 +47,103 @@
 
                     <!-- SECTION -->
                     <section>
+
                         <!-- INICIO -->
                         <article v-if="pantalla == 'inicio'">
-                            <h2>Bienvenido a la gestión de la Grua Municipal</h2>
+
+                            <!-- INDEX -->
+                             <div class="container">
+                                 <h2>Bienvenido a la gestión de la Grua Municipal</h2>
+                             </div>
+                             
                         </article>
 
-                        <!-- LISTADO VEHICULOS -->
-                        <article v-else-if="pantalla == 'lista.vehiculo'">
-                            <h2>lista-vehiculos</h2>
+                        <!-- VEHICULOS -->
+                        <article v-else-if="pantalla == 'vehiculo'">
+
+                            <!-- INDEX -->
+                            <div class="container" v-if="accion == 'index'">
+                                <h2>lista-vehiculos</h2>
+                            </div>
+
                         </article>
                         
-                        <!-- LISTADO RETIRADAS -->
-                        <article v-else-if="pantalla == 'lista.retiradas'">
-                            <h2>lista-retiradas</h2>
+                        <!-- RETIRADAS -->
+                        <article v-else-if="pantalla == 'retirada'">
+                            
+                            <!-- INDEX -->
+                            <div class="container" v-if="accion == 'index'">
+                                <h2>lista-retiradas</h2>
+                            </div>
+                            
                         </article>
 
-                        <!-- GESTION USUARIOS -->
-                        <article v-else-if="pantalla == 'usuarios'">
-                            <table class="table table-striped table-bordered">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>E-Mail</th>
-                                        <th>Password</th>
-                                        <th>Rol</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="usuario in lista_usuarios">
-                                        <td>{{usuario.id}}</td>
-                                        <td>{{usuario.email}}</td>
-                                        <td>{{usuario.password}}</td>
-                                        <td>{{usuario.rol}}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <!-- USUARIOS -->
+                        <article v-else-if="pantalla == 'usuario'">
+                            
+                            <!-- INDEX -->
+                            <div class="container" v-if="accion == 'index'">
+                                <table class="table table-striped table-bordered">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>E-Mail</th>
+                                            <th>Password</th>
+                                            <th>Rol</th>
+                                            <th>Opciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="usuario in lista_usuarios">
+                                            <td>{{usuario.id}}</td>
+                                            <td>{{usuario.email}}</td>
+                                            <td>{{usuario.password}}</td>
+                                            <td>{{usuario.rol}}</td>
+                                            <td>
+                                                <button class="btn btn-warning" @click="ejecutar('usuario', 'edit')">Editar</button>
+                                                <button class="btn btn-danger" @click="ejecutar('usuario', 'delete', usuario.id)">Eliminar</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="5">
+                                                <button class="btn btn-success w-100" @click="'ejecutar', 'create'">Nuevo Usuario</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- CREATE -->
+                            <div class="container" v-else-if="accion == 'create'">
+                                <div class="form-group">
+                                    <label for="email">Email:</label>
+                                    <input type="text" id="email" v-model="usuario.email" class="form-control">
+
+                                    <label for="password">Password:</label>
+                                    <input type="password" id="password" v-model="usuario.password" class="form-control">
+                                    
+                                    <label for="rol">Rol:</label>
+                                    <select id="rol" v-model="usuario.rol" class="form-control">
+                                        <option value="admin">Admin</option>
+                                        <option value="user">User</option>
+                                    </select>
+
+                                    <button class="btn btn-secondary" @click="ejecutar('usuario', 'index')">Cancelar</button>
+                                    <button class="btn btn-success" @click="usuario_create()">Guardar</button>
+                                </div>
+                            </div>
+
+                            <!-- DELETE -->
+                            <div class="container" v-else-if="accion == 'delete'">
+                                <div class="alert alert-danger" role="alert">
+                                    <h4 class="alert-heading">Confirmación de Eliminación</h4>
+                                    <p>¿Estás seguro de que deseas eliminar este usuario?</p>
+                                    <hr>
+                                    <button class="btn btn-secondary" @click="ejecutar('usuario', 'index')">Cancelar</button>
+                                    <button class="btn btn-danger" @click="usuario_delete()">Eliminar</button>
+                                </div>
+                            </div>
+
                         </article>
                     </section>
 
