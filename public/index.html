@@ -100,13 +100,13 @@
                                             <td>{{usuario.password}}</td>
                                             <td>{{usuario.rol}}</td>
                                             <td>
-                                                <button class="btn btn-warning" @click="ejecutar('usuario', 'edit')">Editar</button>
+                                                <button class="btn btn-warning" @click="ejecutar('usuario', 'edit', usuario.id)">Editar</button>
                                                 <button class="btn btn-danger" @click="ejecutar('usuario', 'delete', usuario.id)">Eliminar</button>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td colspan="5">
-                                                <button class="btn btn-success w-100" @click="'ejecutar', 'create'">Nuevo Usuario</button>
+                                                <button class="btn btn-success w-100" @click="ejecutar('usuario', 'create')">Nuevo Usuario</button>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -115,22 +115,96 @@
 
                             <!-- CREATE -->
                             <div class="container" v-else-if="accion == 'create'">
-                                <div class="form-group">
-                                    <label for="email">Email:</label>
-                                    <input type="text" id="email" v-model="usuario.email" class="form-control">
+                                <fieldset class="border p-4 mt-4">
+                                    <legend><b>Nuevo Usuario</b></legend>
+                                    <div class="form-group">
+                                        <div class="form-group">
+                                            <label for="email">Email:</label>
+                                            <input type="text" id="email" v-model="usuario_selected.email" class="form-control" :class="usuario_data_check.email">
+                                            <div class="invalid-feedback">
+                                                {{usuario_data_check.email_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{usuario_data_check.email_msg}}
+                                            </div>
+                                        </div>
+    
+                                        <div class="form-group">
+                                            <label for="password">Password:</label>
+                                            <input type="password" id="password" v-model="usuario_selected.password" class="form-control" :class="usuario_data_check.password">
+                                            <div class="invalid-feedback">
+                                                {{usuario_data_check.password_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{usuario_data_check.password_msg}}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="rol">Rol:</label>
+                                            <select id="rol" v-model="usuario_selected.rol" class="form-control" :class="usuario_data_check.rol">
+                                                <option value="admin">Admin</option>
+                                                <option value="user">User</option>
+                                            </select>
+                                            <div class="invalid-feedback">
+                                                {{usuario_data_check.rol_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{usuario_data_check.rol_msg}}
+                                            </div>
+                                        </div>
+    
+                                        <button class="btn btn-secondary" @click="ejecutar('usuario', 'index')">Cancelar</button>
+                                        <button class="btn btn-success" @click="usuario_create()">Guardar</button>
+                                    </div>
+                                </fieldset>
+                            </div>
 
-                                    <label for="password">Password:</label>
-                                    <input type="password" id="password" v-model="usuario.password" class="form-control">
-                                    
-                                    <label for="rol">Rol:</label>
-                                    <select id="rol" v-model="usuario.rol" class="form-control">
-                                        <option value="admin">Admin</option>
-                                        <option value="user">User</option>
-                                    </select>
-
-                                    <button class="btn btn-secondary" @click="ejecutar('usuario', 'index')">Cancelar</button>
-                                    <button class="btn btn-success" @click="usuario_create()">Guardar</button>
-                                </div>
+                            <!-- EDIT -->
+                            <div class="container" v-else-if="accion == 'edit'">
+                                <fieldset class="border p-4 mt-4">
+                                    <legend><b>Nuevo Usuario</b></legend>
+                                    <div class="form-group">
+                                        <div class="form-group">
+                                            <label for="email">Email:</label>
+                                            <input type="text" id="email" v-model="usuario_selected.email" class="form-control" :class="usuario_data_check.email">
+                                            <div class="invalid-feedback">
+                                                {{usuario_data_check.email_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{usuario_data_check.email_msg}}
+                                            </div>
+                                        </div>
+    
+                                        <div class="form-group">
+                                            <label for="password">Password:</label>
+                                            <input type="password" id="password" v-model="usuario_selected.password" class="form-control" :class="usuario_data_check.password">
+                                            <div class="invalid-feedback">
+                                                {{usuario_data_check.password_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{usuario_data_check.password_msg}}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="rol">Rol:</label>
+                                            <select id="rol" v-model="usuario_selected.rol" class="form-control" :class="usuario_data_check.rol">
+                                                <option value="admin">Admin</option>
+                                                <option value="user">User</option>
+                                            </select>
+                                            <div class="invalid-feedback">
+                                                {{usuario_data_check.rol_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{usuario_data_check.rol_msg}}
+                                            </div>
+                                        </div>
+    
+                                        <button class="btn btn-secondary" @click="ejecutar('usuario', 'index')">Cancelar</button>
+                                        <button class="btn btn-success" @click="usuario_edit()">Guardar</button>
+                                    </div>
+                                </fieldset>
                             </div>
 
                             <!-- DELETE -->

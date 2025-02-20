@@ -27,9 +27,26 @@ class UsuarioController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store()
     {
-        //
+        $input = file_get_contents('php://input');
+        $data = json_decode($input, true);
+        
+        if ($data) {
+            try {
+                $usuario = new Usuario();
+                $usuario->email = $data['email'];
+                $usuario->password = $data['password'];
+                $usuario->rol = $data['rol'];
+                $usuario->save();
+                return response()->json(['message' => 'Usuario created successfully.'], 200);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Error creating Usuario.', 'error' => $e->getMessage()], 500);
+            }
+            return response()->json(['message' => 'Usuario created successfully.'], 200);
+        } else {
+            return response()->json(['message' => 'Data not found.'], 404);
+        }
     }
 
     /**
@@ -52,9 +69,29 @@ class UsuarioController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(string $id)
     {
-        //
+        $input = file_get_contents('php://input');
+        $data = json_decode($input, true);
+
+        if ($data) {
+            try {
+                $usuario = Usuario::find($id);
+                if ($usuario) {
+                    $usuario->email = $data['email'];
+                    $usuario->password = $data['password'];
+                    $usuario->rol = $data['rol'];
+                    $usuario->save();
+                    return response()->json(['message' => 'Usuario updated successfully.'], 200);
+                } else {
+                    return response()->json(['message' => 'Usuario not found.'], 404);
+                }
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Error updating Usuario.', 'error' => $e->getMessage()], 500);
+            }
+        } else {
+            return response()->json(['message' => 'Data not found.'], 404);
+        }
     }
 
     /**
