@@ -7,7 +7,7 @@ let app = new Vue({
         email_input: '',
         password_input: '',
         usuario: "",            // Variable para guardar el usuario logeado
-        pantalla: 'inicio',     // Variable para controlar la pantalla que se muestra
+        pantalla: 'vehiculo',     // Variable para controlar la pantalla que se muestra
         accion: '',
 
         //USUARIO
@@ -28,6 +28,9 @@ let app = new Vue({
 
         //VEHICULO
         lista_vehiculos: [],      // Variable para guardar la lista de vehiculos
+        filtroMatricula: '',
+        filtroFecha: '',
+        filtroEstado: '',
         vehiculo_selected: {
             fecha_entrada: '',
             fecha_salida: '',
@@ -75,6 +78,17 @@ let app = new Vue({
             estado_msg: 'Looks good!'
         }
     },
+    computed: {
+        vehiculosFiltrados() {
+            return this.lista_vehiculos.filter(vehiculo => {
+                return (
+                    (this.filtroMatricula === '' || (vehiculo.matricula && vehiculo.matricula.includes(this.filtroMatricula))) &&
+                    (this.filtroFecha === '' || (vehiculo.fecha && vehiculo.fecha.split(' ')[0] === this.filtroFecha)) &&
+                    (this.filtroEstado === '' || (vehiculo.estado && vehiculo.estado === this.filtroEstado))
+                );
+            });
+        }
+    },
     methods: {
         login() {
             fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/usuarios/index')
@@ -86,6 +100,7 @@ let app = new Vue({
                         this.usuario = user;
                         if(user.admin == 'admin'){
                             this.isAdmin = 'true';
+                            this.ejecutar('retirada', 'index');
                         }else{
                             this.isAdmin = 'false';
                         }
@@ -196,6 +211,9 @@ let app = new Vue({
             else if (pantalla === 'vehiculo') 
             {
                 if (accion === 'index') {
+                    this.filterMatricula = '';
+                    this.filterFecha = '';
+                    this.filterEstado = '';
                     this.vehiculo_index();
                 }else if (accion === 'create') {
                     this.reiniciarDatosVehiculoSelected();
@@ -222,14 +240,13 @@ let app = new Vue({
                 }
             }
 
-            console.log('Pantalla: ' + pantalla + ' | Accion: ' + accion + ' | id: ' + id);
-            
+            // console.log('Pantalla: ' + pantalla + ' | Accion: ' + accion + ' | id: ' + id);
             this.pantalla = pantalla;
             this.accion = accion;
         },
 
         // FUCIONES LOGS
-        async log_create() {
+        async log_create(descripcion) {
             try {
                 const response = await fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/logs/store', {
                     method: 'POST',
@@ -238,7 +255,7 @@ let app = new Vue({
                     },
                     body: JSON.stringify({
                         usuario: this.usuario.id,
-                        accion: this.accion,
+                        accion: this.accion + descripcion,
                         fecha: new Date().toISOString().slice(0, 19).replace('T', ' ')
                     })
                 });
@@ -246,6 +263,18 @@ let app = new Vue({
             } catch (error) {
                 console.error('Error creating log:', error);
                 alert('Error creating log. Please try again later.');
+            }
+        },
+
+        // FUNCIONES RETIRADAS
+        async retirada_index() {
+            try {
+                const response = await fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/retiradas/index');
+                const retiradas = await response.json();
+                this.lista_retiradas = retiradas;
+            } catch (error) {
+                console.error('Error fetching retiradas:', error);
+                alert('Error fetching retiradas. Please try again later.');
             }
         },
 
@@ -271,7 +300,7 @@ let app = new Vue({
                         body: JSON.stringify(this.vehiculo_selected)
                     });
                     console.log(await response.json());
-                    this.log_create();
+                    this.log_create(" vehiculo");
                     this.ejecutar('vehiculo', 'index');
                 } catch (error) {
                     console.error('Error creating vehicle:', error);
@@ -290,7 +319,7 @@ let app = new Vue({
                         body: JSON.stringify(this.vehiculo_selected)
                     });
                     console.log(await response.json());
-                    this.log_create();
+                    this.log_create(" vehiculo. Id: " + this.vehiculo_selected.id);
                     this.ejecutar('vehiculo', 'index');
                 } catch (error) {
                     console.error('Error updating vehicle:', error);
@@ -307,7 +336,7 @@ let app = new Vue({
                     }
                 });
                 console.log(await response.json());
-                this.log_create();
+                this.log_create(" vehiculo. Id: " + this.vehiculo_selected.id);
                 this.ejecutar('vehiculo', 'index');
             } catch (error) {
                 console.error('Error deleting vehicle:', error);
@@ -326,22 +355,29 @@ let app = new Vue({
                 this.vehiculo_data_check.fecha_entrada = 'is-valid';
             }
 
-            if (!this.vehiculo_selected.fecha_salida) {
-                this.vehiculo_data_check.fecha_salida_msg = 'La fecha de salida es requerida.';
-                this.vehiculo_data_check.fecha_salida = 'is-invalid';
-                check = false;
-            } else {
-                this.vehiculo_data_check.fecha_salida_msg = 'Looks good!';
-                this.vehiculo_data_check.fecha_salida = 'is-valid';
-            }
+            // if (!this.vehiculo_selected.fecha_salida) {
+            //     this.vehiculo_data_check.fecha_salida_msg = 'La fecha de salida es requerida.';
+            //     this.vehiculo_data_check.fecha_salida = 'is-invalid';
+            //     check = false;
+            // } else {
+            //     this.vehiculo_data_check.fecha_salida_msg = 'Looks good!';
+            //     this.vehiculo_data_check.fecha_salida = 'is-valid';
+            // }
 
-            if (!this.vehiculo_selected.fecha) {
-                this.vehiculo_data_check.fecha_msg = 'La fecha es requerida.';
-                this.vehiculo_data_check.fecha = 'is-invalid';
-                check = false;
-            } else {
-                this.vehiculo_data_check.fecha_msg = 'Looks good!';
-                this.vehiculo_data_check.fecha = 'is-valid';
+            // if (!this.vehiculo_selected.fecha) {
+            //     this.vehiculo_data_check.fecha_msg = 'La fecha es requerida.';
+            //     this.vehiculo_data_check.fecha = 'is-invalid';
+            //     check = false;
+            // } else {
+            //     this.vehiculo_data_check.fecha_msg = 'Looks good!';
+            //     this.vehiculo_data_check.fecha = 'is-valid';
+            // }
+            
+            if (this.vehiculo_selected.fecha == '') {
+                this.vehiculo_selected.fecha = null;
+            }
+            if(this.vehiculo_selected.fecha_salida == '') {
+                this.vehiculo_selected.fecha_salida = null;
             }
 
             if (!this.vehiculo_selected.lugar) {
@@ -420,6 +456,11 @@ let app = new Vue({
                 this.vehiculo_data_check.tipo_vehiculo_msg = 'El tipo de vehículo es requerido.';
                 this.vehiculo_data_check.tipo_vehiculo = 'is-invalid';
                 check = false;
+            }
+            else if (!['A', 'B', 'C', 'D', 'E', 'F'].includes(this.vehiculo_selected.tipo_vehiculo)) {
+                this.vehiculo_data_check.tipo_vehiculo_msg = 'El tipo de vehículo debe ser "A", "B", "C", "D", "E" o "F".';
+                this.vehiculo_data_check.tipo_vehiculo = 'is-invalid';
+                check = false;
             } else {
                 this.vehiculo_data_check.tipo_vehiculo_msg = 'Looks good!';
                 this.vehiculo_data_check.tipo_vehiculo = 'is-valid';
@@ -468,7 +509,7 @@ let app = new Vue({
                         body: JSON.stringify(this.usuario_selected)
                     });
                     console.log(await response.json());
-                    this.log_create();
+                    this.log_create(" usuario");
                     this.ejecutar('usuario', 'index');
                 } catch (error) {
                     console.error('Error creating user:', error);
@@ -487,7 +528,7 @@ let app = new Vue({
                         body: JSON.stringify(this.usuario_selected)
                     });
                     console.log(await response.json());
-                    this.log_create();
+                    this.log_create(" usuario. Id: " + this.usuario_selected.id);
                     this.ejecutar('usuario', 'index');
                 } catch (error) {
                     console.error('Error updating user:', error);
@@ -504,7 +545,7 @@ let app = new Vue({
                     }
                 });
                 console.log(await response.json());       
-                this.log_create();         
+                this.log_create(" usuario. Id: " + this.usuario_selected.id);         
                 this.ejecutar('usuario', 'index');
             } catch (error) {
                 console.error('Error deleting user:', error);

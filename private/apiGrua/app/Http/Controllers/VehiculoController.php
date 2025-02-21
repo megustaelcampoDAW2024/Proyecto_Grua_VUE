@@ -37,8 +37,8 @@ class VehiculoController extends Controller
             try {
                 $vehiculo = new Vehiculo();
                 $vehiculo->fecha_entrada = $data['fecha_entrada'];
-                $vehiculo->fecha_salida = $data['fecha_salida'];
-                $vehiculo->fecha = $data['fecha'];
+                $vehiculo->fecha_salida = empty($data['fecha_salida']) ? null : $data['fecha_salida'];
+                $vehiculo->fecha = empty($data['fecha']) ? null : $data['fecha'];
                 $vehiculo->lugar = $data['lugar'];
                 $vehiculo->direccion = $data['direccion'];
                 $vehiculo->agente = $data['agente'];
