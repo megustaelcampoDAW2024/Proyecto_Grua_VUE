@@ -29,7 +29,23 @@ class LogController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $input = file_get_contents('php://input');
+        $data = json_decode($input, true);
+
+        if ($data) {
+            try {
+                $log = new Log();
+                $log->usuario_id = $data['usuario'];
+                $log->accion = $data['accion'];
+                $log->fecha = $data['fecha'];
+                $log->save();
+                return response()->json(['message' => 'Log created successfully.'], 200);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Error creating log.', 'error' => $e->getMessage()], 500);
+            }
+        } else {
+            return response()->json(['message' => 'Data not found.'], 404);
+        }
     }
 
     /**

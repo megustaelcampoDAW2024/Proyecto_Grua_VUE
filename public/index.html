@@ -62,8 +62,411 @@
                         <article v-else-if="pantalla == 'vehiculo'">
 
                             <!-- INDEX -->
-                            <div class="container" v-if="accion == 'index'">
-                                <h2>lista-vehiculos</h2>
+                            <div class="p-3" v-if="accion == 'index'">
+                                <h2>Lista de Vehículos</h2>
+                                <table class="table table-striped table-bordered">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Fecha Entrada</th>
+                                            <th>Fecha Salida</th>
+                                            <th>Fecha</th>
+                                            <th>Lugar</th>
+                                            <th>Dirección</th>
+                                            <th>Agente</th>
+                                            <th>Matrícula</th>
+                                            <th>Marca</th>
+                                            <th>Modelo</th>
+                                            <th>Color</th>
+                                            <th>Motivo</th>
+                                            <th>Tipo</th>
+                                            <th>Grua</th>
+                                            <th>Estado</th>
+                                            <th>Opciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="vehiculo in lista_vehiculos">
+                                            <td>2025_{{vehiculo.id}}</td>
+                                            <td>{{vehiculo.fecha_entrada}}</td>
+                                            <td>{{vehiculo.fecha_salida}}</td>
+                                            <td>{{vehiculo.fecha}}</td>
+                                            <td>{{vehiculo.lugar}}</td>
+                                            <td>{{vehiculo.direccion}}</td>
+                                            <td>{{vehiculo.agente}}</td>
+                                            <td>{{vehiculo.matricula}}</td>
+                                            <td>{{vehiculo.marca}}</td>
+                                            <td>{{vehiculo.modelo}}</td>
+                                            <td>{{vehiculo.color}}</td>
+                                            <td>{{vehiculo.motivo}}</td>
+                                            <td>{{vehiculo.tipo_vehiculo}}</td>
+                                            <td>{{vehiculo.grua}}</td>
+                                            <td>
+                                                <span :class="{'badge bg-secondary text-white w-100 px-1': vehiculo.estado === 'En deposito', 'badge bg-success text-white w-100': vehiculo.estado === 'Liquidado'}" style="padding: 13px 0px">{{vehiculo.estado}}</span>
+                                            </td>
+                                            <td class="p-1">
+                                                <button class="btn btn-warning" @click="ejecutar('vehiculo', 'edit', vehiculo.id)">E</button>
+                                                <button class="btn btn-danger" @click="ejecutar('vehiculo', 'delete', vehiculo.id)">D</button>
+                                            </td>
+                                            <tr>
+                                                <td colspan="16">
+                                                    <button class="btn btn-success w-100" @click="ejecutar('vehiculo', 'create')">Nuevo vehiculo</button>
+                                                </td>
+                                            </tr>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- CREATE -->
+                            <div class="container" v-else-if="accion == 'create'">
+                                <fieldset class="border p-4 mt-4">
+                                    <legend><b>Nuevo Vehículo</b></legend>
+                                    <div class="form-group">
+                                        
+                                        <div class="form-group">
+                                            <label for="fecha_entrada">fecha_entrada:</label>
+                                            <input type="datetime-local" id="fecha_entrada" v-model="vehiculo_selected.fecha_entrada" class="form-control" :class="vehiculo_data_check.fecha_entrada">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.fecha_entrada_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.fecha_entrada_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="fecha_salida">fecha_salida:</label>
+                                            <input type="datetime-local" id="fecha_salida" v-model="vehiculo_selected.fecha_salida" class="form-control" :class="vehiculo_data_check.fecha_salida">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.fecha_salida_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.fecha_salida_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="fecha">fecha:</label>
+                                            <input type="datetime-local" id="fecha" v-model="vehiculo_selected.fecha" class="form-control" :class="vehiculo_data_check.fecha">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.fecha_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.fecha_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="lugar">lugar:</label>
+                                            <input type="text" id="lugar" v-model="vehiculo_selected.lugar" class="form-control" :class="vehiculo_data_check.lugar">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.lugar_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.lugar_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="direccion">direccion:</label>
+                                            <input type="text" id="direccion" v-model="vehiculo_selected.direccion" class="form-control" :class="vehiculo_data_check.direccion">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.direccion_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.direccion_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="agente">agente:</label>
+                                            <input type="text" id="agente" v-model="vehiculo_selected.agente" class="form-control" :class="vehiculo_data_check.agente">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.agente_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.agente_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="matricula">matricula:</label>
+                                            <input type="text" id="matricula" v-model="vehiculo_selected.matricula" class="form-control" :class="vehiculo_data_check.matricula">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.matricula_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.matricula_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="marca">marca:</label>
+                                            <input type="text" id="marca" v-model="vehiculo_selected.marca" class="form-control" :class="vehiculo_data_check.marca">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.marca_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.marca_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="modelo">modelo:</label>
+                                            <input type="text" id="modelo" v-model="vehiculo_selected.modelo" class="form-control" :class="vehiculo_data_check.modelo">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.modelo_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.modelo_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="color">color:</label>
+                                            <input type="text" id="color" v-model="vehiculo_selected.color" class="form-control" :class="vehiculo_data_check.color">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.color_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.color_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="motivo">motivo:</label>
+                                            <input type="text" id="motivo" v-model="vehiculo_selected.motivo" class="form-control" :class="vehiculo_data_check.motivo">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.motivo_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.motivo_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="tipo_vehiculo">tipo_vehiculo:</label>
+                                            <input type="text" id="tipo_vehiculo" v-model="vehiculo_selected.tipo_vehiculo" class="form-control" :class="vehiculo_data_check.tipo_vehiculo">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.tipo_vehiculo_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.tipo_vehiculo_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="grua">grua:</label>
+                                            <input type="text" id="grua" v-model="vehiculo_selected.grua" class="form-control" :class="vehiculo_data_check.grua">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.grua_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.grua_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="estado">estado:</label>
+                                            <select id="estado" v-model="vehiculo_selected.estado" class="form-control" :class="vehiculo_data_check.estado">
+                                                <option value="En deposito">En deposito</option>
+                                                <option value="Liquidado">Liquidado</option>
+                                            </select>
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.estado_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.estado_msg}}
+                                            </div>
+                                        </div>
+
+                                        <button class="btn btn-secondary" @click="ejecutar('vehiculo', 'index')">Cancelar</button>
+                                        <button class="btn btn-success" @click="vehiculo_create()">Guardar</button>
+                                    </div>
+                                </fieldset>
+                            </div>
+
+                            <!-- EDIT -->
+
+                            <!-- CREATE -->
+                            <div class="container" v-else-if="accion == 'edit'">
+                                <fieldset class="border p-4 mt-4">
+                                    <legend><b>Editar Vehículo</b></legend>
+                                    <div class="form-group">
+                                        
+                                        <div class="form-group">
+                                            <label for="fecha_entrada">fecha_entrada:</label>
+                                            <input type="datetime-local" id="fecha_entrada" v-model="vehiculo_selected.fecha_entrada" class="form-control" :class="vehiculo_data_check.fecha_entrada">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.fecha_entrada_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.fecha_entrada_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="fecha_salida">fecha_salida:</label>
+                                            <input type="datetime-local" id="fecha_salida" v-model="vehiculo_selected.fecha_salida" class="form-control" :class="vehiculo_data_check.fecha_salida">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.fecha_salida_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.fecha_salida_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="fecha">fecha:</label>
+                                            <input type="datetime-local" id="fecha" v-model="vehiculo_selected.fecha" class="form-control" :class="vehiculo_data_check.fecha">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.fecha_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.fecha_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="lugar">lugar:</label>
+                                            <input type="text" id="lugar" v-model="vehiculo_selected.lugar" class="form-control" :class="vehiculo_data_check.lugar">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.lugar_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.lugar_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="direccion">direccion:</label>
+                                            <input type="text" id="direccion" v-model="vehiculo_selected.direccion" class="form-control" :class="vehiculo_data_check.direccion">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.direccion_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.direccion_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="agente">agente:</label>
+                                            <input type="text" id="agente" v-model="vehiculo_selected.agente" class="form-control" :class="vehiculo_data_check.agente">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.agente_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.agente_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="matricula">matricula:</label>
+                                            <input type="text" id="matricula" v-model="vehiculo_selected.matricula" class="form-control" :class="vehiculo_data_check.matricula">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.matricula_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.matricula_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="marca">marca:</label>
+                                            <input type="text" id="marca" v-model="vehiculo_selected.marca" class="form-control" :class="vehiculo_data_check.marca">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.marca_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.marca_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="modelo">modelo:</label>
+                                            <input type="text" id="modelo" v-model="vehiculo_selected.modelo" class="form-control" :class="vehiculo_data_check.modelo">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.modelo_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.modelo_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="color">color:</label>
+                                            <input type="text" id="color" v-model="vehiculo_selected.color" class="form-control" :class="vehiculo_data_check.color">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.color_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.color_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="motivo">motivo:</label>
+                                            <input type="text" id="motivo" v-model="vehiculo_selected.motivo" class="form-control" :class="vehiculo_data_check.motivo">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.motivo_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.motivo_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="tipo_vehiculo">tipo_vehiculo:</label>
+                                            <input type="text" id="tipo_vehiculo" v-model="vehiculo_selected.tipo_vehiculo" class="form-control" :class="vehiculo_data_check.tipo_vehiculo">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.tipo_vehiculo_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.tipo_vehiculo_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="grua">grua:</label>
+                                            <input type="text" id="grua" v-model="vehiculo_selected.grua" class="form-control" :class="vehiculo_data_check.grua">
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.grua_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.grua_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="estado">estado:</label>
+                                            <select id="estado" v-model="vehiculo_selected.estado" class="form-control" :class="vehiculo_data_check.estado">
+                                                <option value="En deposito">En deposito</option>
+                                                <option value="Liquidado">Liquidado</option>
+                                            </select>
+                                            <div class="invalid-feedback">
+                                                {{vehiculo_data_check.estado_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{vehiculo_data_check.estado_msg}}
+                                            </div>
+                                        </div>
+
+                                        <button class="btn btn-secondary" @click="ejecutar('vehiculo', 'index')">Cancelar</button>
+                                        <button class="btn btn-success" @click="vehiculo_edit()">Guardar Cambios</button>
+                                    </div>
+                                </fieldset>
+                            </div>
+
+                            <!-- DELETE -->
+                            <div class="container" v-else-if="accion == 'delete'">
+                                <div class="alert alert-danger" role="alert">
+                                    <h4 class="alert-heading">Confirmación de Eliminación</h4>
+                                    <p>¿Estás seguro de que deseas eliminar este vehículo?</p>
+                                    <hr>
+                                    <button class="btn btn-secondary" @click="ejecutar('vehiculo', 'index')">Cancelar</button>
+                                    <button class="btn btn-danger" @click="vehiculo_delete()">Eliminar</button>
+                                </div>
                             </div>
 
                         </article>
