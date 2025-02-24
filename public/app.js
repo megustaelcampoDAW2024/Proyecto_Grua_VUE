@@ -1,4 +1,3 @@
-
 let app = new Vue({
     el: '#app',
     data: {
@@ -12,81 +11,104 @@ let app = new Vue({
 
         //USUARIO
         lista_usuarios: [],      // Variable para guardar la lista de usuarios
-        usuario_selected: {
-            email: '',
-            password: '',
-            rol: ''
+        usuario_selected: {},
+        usuario_data_check: {},
+
+        //RETIRADA
+        lista_retiradas: [],      // Variable para guardar la lista de retiradas
+        lista_vehiculos_por_retirar: [],      // Variable para guardar la lista de vehiculos por retirar
+        retirada_selected: {
+            id: '',
+            id_vehiculos: '',
+            id_tarifa: '',
+            nombre: '',
+            nif: '',
+            domicilio: '',
+            poblacion: '',
+            provincia: '',
+            permiso: '',
+            fecha: '',
+            agente: '',
+            tarifa: {
+                opcion_pago: '',
+                horas_gratis: 0,
+                costo_por_hora: 0,
+                importe_retirada: 0,
+                importe_deposito: 0,
+                total: 0
+            },
+            vehiculo: {
+                matricula: '',
+                fecha_entrada: '',
+                fecha_salida: '',
+                lugar: '',
+                direccion: '',
+                agente: '',
+                marca: '',
+                modelo: '',
+                color: '',
+                motivo: '',
+                tipo_vehiculo: '',
+                grua: '',
+                estado: ''
+            }
         },
-        usuario_data_check: {
-            email: '',
-            email_msg: 'Looks good!',
-            password: '',
-            password_msg: 'Looks good!',
-            rol: '',
-            rol_msg: 'Looks good!'
-        },
+        retirada_data_check: {},
 
         //VEHICULO
         lista_vehiculos: [],      // Variable para guardar la lista de vehiculos
         filtroMatricula: '',
         filtroFecha: '',
         filtroEstado: '',
-        vehiculo_selected: {
-            fecha_entrada: '',
-            fecha_salida: '',
-            fecha: '',
-            lugar: '',
-            direccion: '',
-            agente: '',
-            matricula: '',
-            marca: '',
-            modelo: '',
-            color: '',
-            motivo: '',
-            tipo_vehiculo: '',
-            grua: '',
-            estado: ''
-        },
-        vehiculo_data_check: {    // Variable para guardar los mensajes de error de los campos del formulario
-            fecha_entrada: '',
-            fecha_entrada_msg: 'Looks good!',
-            fecha_salida: '',
-            fecha_salida_msg: 'Looks good!',
-            fecha: '',
-            fecha_msg: 'Looks good!',
-            lugar: '',
-            lugar_msg: 'Looks good!',
-            direccion: '',
-            direccion_msg: 'Looks good!',
-            agente: '',
-            agente_msg: 'Looks good!',
-            matricula: '',
-            matricula_msg: 'Looks good!',
-            marca: '',
-            marca_msg: 'Looks good!',
-            modelo: '',
-            modelo_msg: 'Looks good!',
-            color: '',
-            color_msg: 'Looks good!',
-            motivo: '',
-            motivo_msg: 'Looks good!',
-            tipo_vehiculo: '',
-            tipo_vehiculo_msg: 'Looks good!',
-            grua: '',
-            grua_msg: 'Looks good!',
-            estado: '',
-            estado_msg: 'Looks good!'
-        }
+        vehiculo_selected: {},
+        vehiculo_data_check: {}
     },
     computed: {
         vehiculosFiltrados() {
             return this.lista_vehiculos.filter(vehiculo => {
                 return (
                     (this.filtroMatricula === '' || (vehiculo.matricula && vehiculo.matricula.includes(this.filtroMatricula))) &&
-                    (this.filtroFecha === '' || (vehiculo.fecha && vehiculo.fecha.split(' ')[0] === this.filtroFecha)) &&
+                    (this.filtroFecha === '' || (vehiculo.fecha_salida && vehiculo.fecha_salida.split(' ')[0] === this.filtroFecha)) &&
                     (this.filtroEstado === '' || (vehiculo.estado && vehiculo.estado === this.filtroEstado))
                 );
             });
+        },
+        totalTarifa() {
+            if (this.retirada_selected.id_vehiculos) {
+                this.retirada_selected.vehiculo = this.lista_vehiculos_por_retirar.find(v => v.id === this.retirada_selected.id_vehiculos);
+                if (this.retirada_selected.vehiculo) {
+                    const tipoVehiculo = this.retirada_selected.vehiculo.tipo_vehiculo;
+                    let importeRetirada = 0;
+                    switch (tipoVehiculo) {
+                    case 'A':
+                        importeRetirada = 25;
+                        break;
+                    case 'B':
+                        importeRetirada = 100;
+                        break;
+                    case 'C':
+                        importeRetirada = 130;
+                        break;
+                    case 'D':
+                        importeRetirada = 150;
+                        break;
+                    case 'E':
+                    case 'F':
+                        importeRetirada = 0;
+                        break;
+                    }
+                    const fechaEntrada = new Date(this.retirada_selected.vehiculo.fecha_entrada);
+                    const horasEstadia = ((Date.now() - fechaEntrada.getTime()) / (1000 * 60 * 60)).toFixed(2);
+                    const horasCobradas = Math.max(0, horasEstadia - this.retirada_selected.tarifa.horas_gratis).toFixed(2);
+                    const importeDeposito = (horasCobradas * this.retirada_selected.tarifa.costo_por_hora).toFixed(2);
+                    
+                    this.retirada_selected.tarifa.importe_retirada = importeRetirada;
+                    this.retirada_selected.tarifa.importe_deposito = importeDeposito;
+                    this.retirada_selected.tarifa.total = (parseFloat(importeRetirada) + parseFloat(importeDeposito)).toFixed(2);
+                    return this.retirada_selected.tarifa.total;
+                }
+            }
+            return 0;
         }
     },
     methods: {
@@ -145,7 +167,6 @@ let app = new Vue({
             this.vehiculo_selected = {
                 fecha_entrada: '',
                 fecha_salida: '',
-                fecha: '',
                 lugar: '',
                 direccion: '',
                 agente: '',
@@ -163,8 +184,6 @@ let app = new Vue({
                 fecha_entrada_msg: 'Looks good!',
                 fecha_salida: '',
                 fecha_salida_msg: 'Looks good!',
-                fecha: '',
-                fecha_msg: 'Looks good!',
                 lugar: '',
                 lugar_msg: 'Looks good!',
                 direccion: '',
@@ -188,6 +207,70 @@ let app = new Vue({
                 estado: '',
                 estado_msg: 'Looks good!'
             }
+        },
+        reiniciarDatosRetiradaSelected() {
+            this.retirada_selected = {
+                id: '',
+                id_vehiculos: '',
+                id_tarifa: '',
+                nombre: '',
+                nif: '',
+                domicilio: '',
+                poblacion: '',
+                provincia: '',
+                permiso: '',
+                fecha: '',
+                agente: '',
+                tarifa: {
+                    opcion_pago: '',
+                    horas_gratis: 24,
+                    costo_por_hora: 1,
+                    importe_retirada: 0,
+                    importe_deposito: 0,
+                    total: 0
+                },
+                vehiculo: {
+                    matricula: '',
+                    fecha_entrada: '',
+                    fecha_salida: '',
+                    lugar: '',
+                    direccion: '',
+                    agente: '',
+                    marca: '',
+                    modelo: '',
+                    color: '',
+                    motivo: '',
+                    tipo_vehiculo: '',
+                    grua: '',
+                    estado: ''
+                }
+            };
+            this.retirada_data_check = {
+                id: '',
+                id_msg: 'Looks good!',
+                id_vehiculos: '',
+                id_vehiculos_msg: 'Looks good!',
+                id_tarifa: '',
+                id_tarifa_msg: 'Looks good!',
+                nombre: '',
+                nombre_msg: 'Looks good!',
+                nif: '',
+                nif_msg: 'Looks good!',
+                domicilio: '',
+                domicilio_msg: 'Looks good!',
+                poblacion: '',
+                poblacion_msg: 'Looks good!',
+                provincia: '',
+                provincia_msg: 'Looks good!',
+                permiso: '',
+                permiso_msg: 'Looks good!',
+                fecha: '',
+                fecha_msg: 'Looks good!',
+                agente: '',
+                agente_msg: 'Looks good!'
+            };
+            
+            this.lista_vehiculos_por_retirar == [];
         },
         ejecutar(pantalla, accion, id) {
 
@@ -230,8 +313,10 @@ let app = new Vue({
             else if (pantalla === 'retirada')
             {
                 if (accion === 'index') {
-                    // this.retirada_index();
+                    this.retirada_index();
                 }else if (accion === 'create') {
+                    this.reiniciarDatosRetiradaSelected();
+                    this.get_lista_vehiculos_por_retirar();
                     // this.retirada_create();
                 }else if (accion === 'edit') {
                     // this.retirada_edit();
@@ -267,15 +352,137 @@ let app = new Vue({
         },
 
         // FUNCIONES RETIRADAS
+        async get_lista_vehiculos_por_retirar() {
+            try {
+                const response = await fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/vehiculos/por_retirar');
+                const vehicles = await response.json();
+                this.lista_vehiculos_por_retirar = vehicles;
+            } catch (error) {
+                console.error('Error fetching vehicles:', error);
+                alert('Error fetching vehicles. Please try again later.');
+            }
+        },
+        
         async retirada_index() {
             try {
                 const response = await fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/retiradas/index');
                 const retiradas = await response.json();
                 this.lista_retiradas = retiradas;
+                console.log(this.lista_retiradas);
+                
             } catch (error) {
                 console.error('Error fetching retiradas:', error);
                 alert('Error fetching retiradas. Please try again later.');
             }
+        },
+
+        async retirada_create() {
+            if(this.retirada_check()) {
+                try {
+                    console.log("this.retirada_selected");                    
+                    const response = await fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/retiradas/store', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(this.retirada_selected)
+                    });
+                    console.log(await response.json());
+                    this.log_create(" retirada");
+                    this.ejecutar('retirada', 'index');
+                } catch (error) {
+                    console.error('Error creating retirada:', error);
+                    alert('Error creating retirada. Please try again later.');
+                }
+            }
+            console.log("this.retirada_selected_fail");
+        },
+
+        retirada_check() {
+            let check = true;
+
+            if (!this.retirada_selected.id_vehiculos) {
+                this.retirada_data_check.id_vehiculos_msg = 'El vehículo es requerido.';
+                this.retirada_data_check.id_vehiculos = 'is-invalid';
+                check = false;
+            } else {
+                this.retirada_data_check.id_vehiculos_msg = 'Looks good!';
+                this.retirada_data_check.id_vehiculos = 'is-valid';
+            }
+
+            if (!this.retirada_selected.nombre) {
+                this.retirada_data_check.nombre_msg = 'El nombre es requerido.';
+                this.retirada_data_check.nombre = 'is-invalid';
+                check = false;
+            } else {
+                this.retirada_data_check.nombre_msg = 'Looks good!';
+                this.retirada_data_check.nombre = 'is-valid';
+            }
+
+            if (!this.retirada_selected.nif) {
+                this.retirada_data_check.nif_msg = 'El NIF es requerido.';
+                this.retirada_data_check.nif = 'is-invalid';
+                check = false;
+            } else {
+                this.retirada_data_check.nif_msg = 'Looks good!';
+                this.retirada_data_check.nif = 'is-valid';
+            }
+
+            if (!this.retirada_selected.domicilio) {
+                this.retirada_data_check.domicilio_msg = 'El domicilio es requerido.';
+                this.retirada_data_check.domicilio = 'is-invalid';
+                check = false;
+            } else {
+                this.retirada_data_check.domicilio_msg = 'Looks good!';
+                this.retirada_data_check.domicilio = 'is-valid';
+            }
+
+            if (!this.retirada_selected.poblacion) {
+                this.retirada_data_check.poblacion_msg = 'La población es requerida.';
+                this.retirada_data_check.poblacion = 'is-invalid';
+                check = false;
+            } else {
+                this.retirada_data_check.poblacion_msg = 'Looks good!';
+                this.retirada_data_check.poblacion = 'is-valid';
+            }
+
+            if (!this.retirada_selected.provincia) {
+                this.retirada_data_check.provincia_msg = 'La provincia es requerida.';
+                this.retirada_data_check.provincia = 'is-invalid';
+                check = false;
+            } else {
+                this.retirada_data_check.provincia_msg = 'Looks good!';
+                this.retirada_data_check.provincia = 'is-valid';
+            }
+
+            if (!this.retirada_selected.permiso) {
+                this.retirada_data_check.permiso_msg = 'El permiso es requerido.';
+                this.retirada_data_check.permiso = 'is-invalid';
+                check = false;
+            } else {
+                this.retirada_data_check.permiso_msg = 'Looks good!';
+                this.retirada_data_check.permiso = 'is-valid';
+            }
+
+            if (!this.retirada_selected.fecha) {
+                this.retirada_data_check.fecha_msg = 'La fecha es requerida.';
+                this.retirada_data_check.fecha = 'is-invalid';
+                check = false;
+            } else {
+                this.retirada_data_check.fecha_msg = 'Looks good!';
+                this.retirada_data_check.fecha = 'is-valid';
+            }
+
+            if (!this.retirada_selected.agente) {
+                this.retirada_data_check.agente_msg = 'El agente es requerido.';
+                this.retirada_data_check.agente = 'is-invalid';
+                check = false;
+            } else {
+                this.retirada_data_check.agente_msg = 'Looks good!';
+                this.retirada_data_check.agente = 'is-valid';
+            }
+
+            return check;
         },
 
         // FUNCIONES VEHICULOS
@@ -355,29 +562,13 @@ let app = new Vue({
                 this.vehiculo_data_check.fecha_entrada = 'is-valid';
             }
 
-            // if (!this.vehiculo_selected.fecha_salida) {
-            //     this.vehiculo_data_check.fecha_salida_msg = 'La fecha de salida es requerida.';
-            //     this.vehiculo_data_check.fecha_salida = 'is-invalid';
-            //     check = false;
-            // } else {
-            //     this.vehiculo_data_check.fecha_salida_msg = 'Looks good!';
-            //     this.vehiculo_data_check.fecha_salida = 'is-valid';
-            // }
-
-            // if (!this.vehiculo_selected.fecha) {
-            //     this.vehiculo_data_check.fecha_msg = 'La fecha es requerida.';
-            //     this.vehiculo_data_check.fecha = 'is-invalid';
-            //     check = false;
-            // } else {
-            //     this.vehiculo_data_check.fecha_msg = 'Looks good!';
-            //     this.vehiculo_data_check.fecha = 'is-valid';
-            // }
-            
-            if (this.vehiculo_selected.fecha == '') {
-                this.vehiculo_selected.fecha = null;
-            }
-            if(this.vehiculo_selected.fecha_salida == '') {
+            if (this.vehiculo_selected.fecha_salida == '') {
                 this.vehiculo_selected.fecha_salida = null;
+            }else if (this.accion === 'edit') {
+                if (this.vehiculo_selected.fecha_salida != '') {
+                    this.vehiculo_data_check.fecha_salida_msg = 'Looks good!';
+                    this.vehiculo_data_check.fecha_salida = 'is-valid';
+                }
             }
 
             if (!this.vehiculo_selected.lugar) {

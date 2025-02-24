@@ -20,4 +20,9 @@ class Vehiculo extends Model
     {
         return self::all()->toJson();
     }
+    
+    public function porRetirar()
+    {
+        return self::where('fecha_salida', null)->get()->toJson();
+    }
 }

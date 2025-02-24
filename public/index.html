@@ -62,17 +62,227 @@
                         </article>
 
                         <!-- RETIRADAS -->
-                        <article v-else-if="pantalla == 'retirada'">
-                            
+                        <article v-if="pantalla == 'retirada'">
+                                
                             <!-- INDEX -->
                             <div class="container" v-if="accion == 'index'">
-                                <h2>lista-retiradas</h2>
+                                <table class="table table-striped table-bordered">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>ID Tarifa</th>
+                                            <th>ID Vehículo</th>
+                                            <th>Tipo vehículo</th>
+                                            <th>Nombre</th>
+                                            <th>NIF</th>
+                                            <th>Domicilio</th>
+                                            <th>Población</th>
+                                            <th>Provincia</th>
+                                            <th>Permiso</th>
+                                            <th>Fecha</th>
+                                            <th>Agente</th>
+                                            <th>Opciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="retirada in lista_retiradas">
+                                            <td>T_2025_{{retirada.id_tarifa}}</td>
+                                            <td>2025_{{retirada.id_vehiculos}}</td>
+                                            <td>
+                                                <button class="btn" 
+                                                    :class="{
+                                                        'btn-primary': retirada.vehiculo.tipo_vehiculo === 'A', 
+                                                        'btn-secondary': retirada.vehiculo.tipo_vehiculo === 'B', 
+                                                        'btn-success': retirada.vehiculo.tipo_vehiculo === 'C', 
+                                                        'btn-danger': retirada.vehiculo.tipo_vehiculo === 'D', 
+                                                        'btn-warning': retirada.vehiculo.tipo_vehiculo === 'E', 
+                                                        'btn-dark': retirada.vehiculo.tipo_vehiculo === 'F'
+                                                    }" 
+                                                    data-toggle="modal" 
+                                                    data-target="#tipoVehiculoModal">
+                                                    Tipo_{{ retirada.vehiculo.tipo_vehiculo }}
+                                                </button>
+                                            </td>
+                                            <td>{{retirada.nombre}}</td>
+                                            <td>{{retirada.nif}}</td>
+                                            <td>{{retirada.domicilio}}</td>
+                                            <td>{{retirada.poblacion}}</td>
+                                            <td>{{retirada.provincia}}</td>
+                                            <td>{{retirada.permiso}}</td>
+                                            <td>{{retirada.fecha}}</td>
+                                            <td>{{retirada.agente}}</td>
+                                            <td class="p-1">
+                                                <button class="btn btn-warning" @click="ejecutar('retirada', 'edit', retirada.id)">E</button>
+                                                <button class="btn btn-danger" @click="ejecutar('retirada', 'delete', retirada.id)">D</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="12">
+                                                <button class="btn btn-success w-100" @click="ejecutar('retirada', 'create')">Nuevo vehiculo</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
+
+                            <!-- CREATE -->
+                            <div class="container" v-else-if="accion == 'create'">
+                                <fieldset class="border p-4 mt-4">
+                                    <legend><b>Nueva Retirada</b></legend>
+                                    <div class="form-group">
+                                        
+                                        <div class="form-group">
+                                            <label for="id_vehiculos">Vehículo:</label>
+                                            <select id="id_vehiculos" v-model="retirada_selected.id_vehiculos" class="form-control" :class="retirada_data_check.id_vehiculos">
+                                                <option v-for="vehiculo in lista_vehiculos_por_retirar" :value="vehiculo.id">{{vehiculo.matricula}}</option>
+                                            </select>
+                                            <div class="invalid-feedback">
+                                                {{retirada_data_check.id_vehiculos_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{retirada_data_check.id_vehiculos_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="nombre">Nombre:</label>
+                                            <input type="text" id="nombre" v-model="retirada_selected.nombre" class="form-control" :class="retirada_data_check.nombre">
+                                            <div class="invalid-feedback">
+                                                {{retirada_data_check.nombre_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{retirada_data_check.nombre_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="nif">NIF:</label>
+                                            <input type="text" id="nif" v-model="retirada_selected.nif" class="form-control" :class="retirada_data_check.nif">
+                                            <div class="invalid-feedback">
+                                                {{retirada_data_check.nif_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{retirada_data_check.nif_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="domicilio">Domicilio:</label>
+                                            <input type="text" id="domicilio" v-model="retirada_selected.domicilio" class="form-control" :class="retirada_data_check.domicilio">
+                                            <div class="invalid-feedback">
+                                                {{retirada_data_check.domicilio_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{retirada_data_check.domicilio_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="poblacion">Población:</label>
+                                            <input type="text" id="poblacion" v-model="retirada_selected.poblacion" class="form-control" :class="retirada_data_check.poblacion">
+                                            <div class="invalid-feedback">
+                                                {{retirada_data_check.poblacion_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{retirada_data_check.poblacion_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="provincia">Provincia:</label>
+                                            <input type="text" id="provincia" v-model="retirada_selected.provincia" class="form-control" :class="retirada_data_check.provincia">
+                                            <div class="invalid-feedback">
+                                                {{retirada_data_check.provincia_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{retirada_data_check.provincia_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="permiso">Permiso:</label>
+                                            <input type="text" id="permiso" v-model="retirada_selected.permiso" class="form-control" :class="retirada_data_check.permiso">
+                                            <div class="invalid-feedback">
+                                                {{retirada_data_check.permiso_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{retirada_data_check.permiso_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="fecha">Fecha:</label>
+                                            <input type="date" id="fecha" v-model="retirada_selected.fecha" class="form-control" :class="retirada_data_check.fecha">
+                                            <div class="invalid-feedback">
+                                                {{retirada_data_check.fecha_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{retirada_data_check.fecha_msg}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="agente">Agente:</label>
+                                            <input type="text" id="agente" v-model="retirada_selected.agente" class="form-control" :class="retirada_data_check.agente">
+                                            <div class="invalid-feedback">
+                                                {{retirada_data_check.agente_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{retirada_data_check.agente_msg}}
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </fieldset>
+                                
+                                <fieldset class="border p-4 mt-4">
+                                    <legend><b>Nueva Tarifa</b></legend>
+                                    <div class="form-group">
+                                        <div class="form-group">
+                                            <label for="opcion_pago">Opción de Pago:</label>
+                                            <select id="opcion_pago" v-model="retirada_selected.tarifa.opcion_pago" class="form-control">
+                                                <option value="metalico">Metálico</option>
+                                                <option value="tarjeta">Tarjeta</option>
+                                                <option value="bizum">Bizum</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="horas_gratis">Horas Gratis:</label>
+                                            <input type="number" id="horas_gratis" v-model="retirada_selected.tarifa.horas_gratis" class="form-control">
+                                            <div class="invalid-feedback">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="costo_por_hora">Costo por Hora:</label>
+                                            <input type="number" id="costo_por_hora" v-model="retirada_selected.tarifa.costo_por_hora" class="form-control">
+                                            <div class="invalid-feedback">
+                                        </div>
+                                        
+                                        <hr>
+
+                                        <div class="form-group">
+                                            <label>Importe Retirada:<b> {{ retirada_selected.tarifa.importe_retirada }} €</b></label>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Importe Depósito:<b> {{ retirada_selected.tarifa.importe_deposito }} €</b></label>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Total: <b>{{totalTarifa}}</b></label>
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <button class="btn btn-secondary" @click="ejecutar('retirada', 'index')">Cancelar</button>
+                                <button class="btn btn-success" @click="retirada_create()">Guardar</button>
+                            </div>
+
                             
                         </article>
 
                         <!-- VEHICULOS -->
-                        <article v-else-if="pantalla == 'vehiculo'">
+                        <article v-if="pantalla == 'vehiculo'">
 
                             <!-- INDEX -->
                             <div class="p-3" v-if="accion == 'index'">
@@ -100,7 +310,6 @@
                                             <th>ID</th>
                                             <th>Fecha Entrada</th>
                                             <th>Fecha Salida</th>
-                                            <th>Fecha</th>
                                             <th>Lugar</th>
                                             <th>Dirección</th>
                                             <th>Agente</th>
@@ -120,7 +329,6 @@
                                             <td>2025_{{vehiculo.id}}</td>
                                             <td>{{vehiculo.fecha_entrada}}</td>
                                             <td>{{vehiculo.fecha_salida}}</td>
-                                            <td>{{vehiculo.fecha}}</td>
                                             <td>{{vehiculo.lugar}}</td>
                                             <td>{{vehiculo.direccion}}</td>
                                             <td>{{vehiculo.agente}}</td>
@@ -180,7 +388,7 @@
                                                 <button class="btn btn-danger" @click="ejecutar('vehiculo', 'delete', vehiculo.id)">D</button>
                                             </td>
                                             <tr>
-                                                <td colspan="16">
+                                                <td colspan="15">
                                                     <button class="btn btn-success w-100" @click="ejecutar('vehiculo', 'create')">Nuevo vehiculo</button>
                                                 </td>
                                             </tr>
@@ -214,17 +422,6 @@
                                             </div>
                                             <div class="valid-feedback">
                                                 {{vehiculo_data_check.fecha_salida_msg}}
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="fecha">fecha:</label>
-                                            <input type="datetime-local" id="fecha" v-model="vehiculo_selected.fecha" class="form-control" :class="vehiculo_data_check.fecha">
-                                            <div class="invalid-feedback">
-                                                {{vehiculo_data_check.fecha_msg}}
-                                            </div>
-                                            <div class="valid-feedback">
-                                                {{vehiculo_data_check.fecha_msg}}
                                             </div>
                                         </div>
 
@@ -395,17 +592,6 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <label for="fecha">fecha:</label>
-                                            <input type="datetime-local" id="fecha" v-model="vehiculo_selected.fecha" class="form-control" :class="vehiculo_data_check.fecha">
-                                            <div class="invalid-feedback">
-                                                {{vehiculo_data_check.fecha_msg}}
-                                            </div>
-                                            <div class="valid-feedback">
-                                                {{vehiculo_data_check.fecha_msg}}
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
                                             <label for="lugar">lugar:</label>
                                             <input type="text" id="lugar" v-model="vehiculo_selected.lugar" class="form-control" :class="vehiculo_data_check.lugar">
                                             <div class="invalid-feedback">
@@ -556,7 +742,7 @@
                         </article>
 
                         <!-- USUARIOS -->
-                        <article v-else-if="pantalla == 'usuario'">
+                        <article v-if="pantalla == 'usuario'">
                             
                             <!-- INDEX -->
                             <div class="container" v-if="accion == 'index'">

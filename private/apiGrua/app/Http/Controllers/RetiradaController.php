@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Retirada;
+use App\Models\Vehiculo;
 
 class RetiradaController extends Controller
 {
@@ -15,7 +16,7 @@ class RetiradaController extends Controller
         $retirada = new Retirada();
         return $retirada->index();
     }
-
+    
     /**
      * Show the form for creating a new resource.
      */
@@ -27,9 +28,38 @@ class RetiradaController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store()
     {
-        //
+        $input = file_get_contents('php://input');
+        $data = json_decode($input, true);
+
+        if ($data) {
+            try {
+                $retirada = new Retirada();
+                $retirada->id_vehiculos = $data['id_vehiculos'];
+                $retirada->nombre = $data['nombre'];
+                $retirada->nif = $data['nif'];
+                $retirada->domicilio = $data['domicilio'];
+                $retirada->poblacion = $data['poblacion'];
+                $retirada->provincia = $data['provincia'];
+                $retirada->permiso = $data['permiso'];
+                $retirada->fecha = $data['fecha'];
+                $retirada->agente = $data['agente'];
+                $retirada->save();
+
+                $vehiculo = Vehiculo::find($data['id_vehiculos']);
+                if ($vehiculo) {
+                    $vehiculo->fecha_salida = now();
+                    $vehiculo->save();
+                }
+
+                return response()->json(['message' => 'Retirada created successfully'], 201);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Error creating Retirada.', 'error' => $e->getMessage()], 500);
+            }
+        } else {
+            return response()->json(['message' => 'Data not found.'], 404);
+        }
     }
 
     /**

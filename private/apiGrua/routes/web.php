@@ -45,6 +45,7 @@ Route::any('/usuarios/delete/{id}', [UsuarioController::class, 'destroy']);
 
 // Rutas VehiculoController
 Route::any('/vehiculos/index', [VehiculoController::class, 'index']);
+Route::any('/vehiculos/por_retirar', [VehiculoController::class, 'porRetirar']);
 Route::any('/vehiculos/create', [VehiculoController::class, 'create']);
 Route::any('/vehiculos/store', [VehiculoController::class, 'store']);
 Route::any('/vehiculos/show/{id}', [VehiculoController::class, 'show']);

@@ -17,6 +17,12 @@ class VehiculoController extends Controller
         return $vehiculo->index();
     }
 
+    public function porRetirar()
+    {
+        $retirada = new Vehiculo();
+        return $retirada->porRetirar();
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -38,7 +44,6 @@ class VehiculoController extends Controller
                 $vehiculo = new Vehiculo();
                 $vehiculo->fecha_entrada = $data['fecha_entrada'];
                 $vehiculo->fecha_salida = empty($data['fecha_salida']) ? null : $data['fecha_salida'];
-                $vehiculo->fecha = empty($data['fecha']) ? null : $data['fecha'];
                 $vehiculo->lugar = $data['lugar'];
                 $vehiculo->direccion = $data['direccion'];
                 $vehiculo->agente = $data['agente'];
@@ -91,7 +96,6 @@ class VehiculoController extends Controller
                 if ($vehiculo) {
                     $vehiculo->fecha_entrada = $data['fecha_entrada'];
                     $vehiculo->fecha_salida = $data['fecha_salida'];
-                    $vehiculo->fecha = $data['fecha'];
                     $vehiculo->lugar = $data['lugar'];
                     $vehiculo->direccion = $data['direccion'];
                     $vehiculo->agente = $data['agente'];

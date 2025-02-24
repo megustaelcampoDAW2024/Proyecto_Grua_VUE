@@ -23,6 +23,7 @@ class Retirada extends Model
 
     public function index()
     {
-        return self::all()->toJson();
+        return self::with(['vehiculo', 'tarifa'])->get()->toJson();
     }
+    
 }
