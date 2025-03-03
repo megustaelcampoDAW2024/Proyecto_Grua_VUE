@@ -1,0 +1,192 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API Grua",
+        "description": "API para gestión de vehículos retirados por grúa",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/vehiculos": {
+            "get": {
+                "summary": "Obtener lista de vehículos",
+                "operationId": "b912521b0e41dec60b1fd4d98a0e06fe",
+                "responses": {
+                    "200": {
+                        "description": "Lista de vehículos obtenida correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/VehiculoRequest"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Crear nuevo vehículo",
+                "operationId": "20a2f18df869f0d5e7d5ddce18285c29",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VehiculoRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Vehículo creado correctamente"
+                    }
+                }
+            }
+        },
+        "/api/vehiculos/por_retirar": {
+            "get": {
+                "summary": "Obtener vehículos pendientes de retirar",
+                "operationId": "61abcbd46c60d0d6de4dd68e55f1da1d",
+                "responses": {
+                    "200": {
+                        "description": "Lista de vehículos por retirar"
+                    }
+                }
+            }
+        },
+        "/api/vehiculos/{id}": {
+            "put": {
+                "summary": "Actualizar vehículo existente",
+                "operationId": "96084827a5107cad2b7ea8faa4eaf765",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VehiculoRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Vehículo actualizado correctamente"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Eliminar vehículo",
+                "operationId": "9b11c434f19fa00c1d0b5d3fc9ca526e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del vehículo",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Vehículo eliminado correctamente"
+                    },
+                    "404": {
+                        "description": "Vehículo no encontrado"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "VehiculoRequest": {
+                "required": [
+                    "fecha_entrada",
+                    "lugar",
+                    "direccion",
+                    "agente",
+                    "matricula",
+                    "marca",
+                    "modelo",
+                    "color",
+                    "motivo",
+                    "tipo_vehiculo",
+                    "grua",
+                    "estado"
+                ],
+                "properties": {
+                    "fecha_entrada": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-03-26T17:18"
+                    },
+                    "fecha_salida": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "lugar": {
+                        "type": "string",
+                        "example": "aawdawd"
+                    },
+                    "direccion": {
+                        "type": "string",
+                        "example": "aawdawd"
+                    },
+                    "agente": {
+                        "type": "string",
+                        "example": "aawdawd"
+                    },
+                    "matricula": {
+                        "type": "string",
+                        "example": "2344OOO"
+                    },
+                    "marca": {
+                        "type": "string",
+                        "example": "aawdawd"
+                    },
+                    "modelo": {
+                        "type": "string",
+                        "example": "aawdawd"
+                    },
+                    "color": {
+                        "type": "string",
+                        "example": "aawdawd"
+                    },
+                    "motivo": {
+                        "type": "string",
+                        "example": "aawdawd"
+                    },
+                    "tipo_vehiculo": {
+                        "type": "string",
+                        "example": "A"
+                    },
+                    "grua": {
+                        "type": "string",
+                        "example": "aawdawd"
+                    },
+                    "estado": {
+                        "type": "string",
+                        "example": "En deposito"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    }
+}

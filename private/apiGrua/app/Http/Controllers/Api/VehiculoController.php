@@ -7,10 +7,42 @@ use Illuminate\Http\Request;
 use App\Models\Vehiculo;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @OA\Info(
+ *     title="API Grua",
+ *     version="1.0.0",
+ *     description="API para gestión de vehículos retirados por grúa"
+ * )
+ * @OA\Schema(
+ *     schema="VehiculoRequest",
+ *     required={"fecha_entrada", "lugar", "direccion", "agente", "matricula", "marca", "modelo", "color", "motivo", "tipo_vehiculo", "grua", "estado"},
+ *     @OA\Property(property="fecha_entrada", type="string", format="date-time", example="2025-03-26T17:18"),
+ *     @OA\Property(property="fecha_salida", type="string", format="date-time", nullable=true),
+ *     @OA\Property(property="lugar", type="string", example="aawdawd"),
+ *     @OA\Property(property="direccion", type="string", example="aawdawd"),
+ *     @OA\Property(property="agente", type="string", example="aawdawd"),
+ *     @OA\Property(property="matricula", type="string", example="2344OOO"),
+ *     @OA\Property(property="marca", type="string", example="aawdawd"),
+ *     @OA\Property(property="modelo", type="string", example="aawdawd"),
+ *     @OA\Property(property="color", type="string", example="aawdawd"),
+ *     @OA\Property(property="motivo", type="string", example="aawdawd"),
+ *     @OA\Property(property="tipo_vehiculo", type="string", example="A"),
+ *     @OA\Property(property="grua", type="string", example="aawdawd"),
+ *     @OA\Property(property="estado", type="string", example="En deposito")
+ * )
+ */
 class VehiculoController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @OA\Get(
+     *     path="/api/vehiculos",
+     *     summary="Obtener lista de vehículos",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de vehículos obtenida correctamente",
+     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/VehiculoRequest"))
+     *     )
+     * )
      */
     public function index()
     {
@@ -18,6 +50,16 @@ class VehiculoController extends Controller
         return $vehiculo->index();
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/vehiculos/por_retirar",
+     *     summary="Obtener vehículos pendientes de retirar",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de vehículos por retirar"
+     *     )
+     * )
+     */
     public function porRetirar()
     {
         $retirada = new Vehiculo();
@@ -25,7 +67,18 @@ class VehiculoController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *     path="/api/vehiculos",
+     *     summary="Crear nuevo vehículo",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/VehiculoRequest")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Vehículo creado correctamente"
+     *     )
+     * )
      */
     public function store()
     {
@@ -60,7 +113,24 @@ class VehiculoController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * @OA\Put(
+     *     path="/api/vehiculos/{id}",
+     *     summary="Actualizar vehículo existente",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/VehiculoRequest")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Vehículo actualizado correctamente"
+     *     )
+     * )
      */
     public function update(Request $request, string $id)
     {
@@ -98,7 +168,25 @@ class VehiculoController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @OA\Delete(
+     *     path="/api/vehiculos/{id}",
+     *     summary="Eliminar vehículo",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID del vehículo",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Vehículo eliminado correctamente"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Vehículo no encontrado"
+     *     )
+     * )
      */
     public function destroy(string $id)
     {
