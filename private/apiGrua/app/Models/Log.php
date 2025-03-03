@@ -18,6 +18,6 @@ class Log extends Model
 
     public function index()
     {
-        return self::all()->toJson();
+        return self::orderBy('id', 'desc')->get()->toJson();
     }
 }

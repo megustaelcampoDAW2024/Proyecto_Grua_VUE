@@ -1,13 +1,22 @@
+/*
+Editar y eliminar Retiradas
+*/
 let app = new Vue({
     el: '#app',
     data: {
-        loggedIn: false,
-        isAdmin: 'false',
+        alertMessage: '',
+        alertType: 'alert-success',
+
+        loggedIn: localStorage.getItem('loggedIn') === 'true' || false,
+        isAdmin: localStorage.getItem('isAdmin') || 'false',
         email_input: '',
         password_input: '',
-        usuario: "",            // Variable para guardar el usuario logeado
-        pantalla: 'vehiculo',     // Variable para controlar la pantalla que se muestra
+        usuario: JSON.parse(localStorage.getItem('user')) || "",   // Variable para guardar el usuario logeado
+        pantalla: 'inicio',     // Variable para controlar la pantalla que se muestra
         accion: '',
+
+        //LOG
+        lista_logs: [],      // Variable para guardar la lista de logs
 
         //USUARIO
         lista_usuarios: [],      // Variable para guardar la lista de usuarios
@@ -120,9 +129,12 @@ let app = new Vue({
                     if (user) {
                         this.loggedIn = true;
                         this.usuario = user;
-                        if(user.admin == 'admin'){
+                        localStorage.setItem('user', JSON.stringify(user)); // Store user in local storage
+                        localStorage.setItem('loggedIn', 'true'); // Store login status
+                        localStorage.setItem('isAdmin', user.rol === 'admin' ? 'true' : 'false');
+
+                        if(user.rol == 'admin'){
                             this.isAdmin = 'true';
-                            this.ejecutar('retirada', 'index');
                         }else{
                             this.isAdmin = 'false';
                         }
@@ -140,6 +152,11 @@ let app = new Vue({
             this.isAdmin = 'false',
             this.email_input = '';
             this.password_input = '';
+            this.pantalla = 'inicio';
+            this.accion = 'index';
+            localStorage.removeItem('user'); // Remove user from local storage
+            localStorage.removeItem('loggedIn'); // Remove login status
+            localStorage.removeItem('isAdmin');
         },
         formatDate(timestamp) {
             const date = new Date(timestamp);
@@ -267,12 +284,22 @@ let app = new Vue({
                 fecha: '',
                 fecha_msg: 'Looks good!',
                 agente: '',
-                agente_msg: 'Looks good!'
+                agente_msg: 'Looks good!',
+                opcion_pago: '',
+                opcion_pago_msg: 'Looks good!',
+                horas_gratis: '',
+                horas_gratis_msg: 'Looks good!',
+                costo_por_hora: '',
+                costo_por_hora_msg: 'Looks good!'
             };
             
             this.lista_vehiculos_por_retirar == [];
         },
         ejecutar(pantalla, accion, id) {
+
+            if ($.fn.DataTable.isDataTable('#logTable')) {
+                $('#logTable').DataTable().destroy();
+            }
 
             // Usuario
             if (pantalla === 'usuario') 
@@ -317,11 +344,22 @@ let app = new Vue({
                 }else if (accion === 'create') {
                     this.reiniciarDatosRetiradaSelected();
                     this.get_lista_vehiculos_por_retirar();
+                    if (id) {
+                        this.retirada_selected.id_vehiculos = id;
+                    }
                     // this.retirada_create();
                 }else if (accion === 'edit') {
                     // this.retirada_edit();
                 }else if (accion === 'delete') {
                     // this.retirada_delete();
+                }
+            }
+
+            // Log
+            else if (pantalla === 'log')
+            {
+                if (accion === 'index') {
+                    this.log_index();
                 }
             }
 
@@ -350,11 +388,26 @@ let app = new Vue({
                 alert('Error creating log. Please try again later.');
             }
         },
+        async log_index() {
+            try {
+                const response = await fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/logs/index');
+                const logs = await response.json();
+                this.lista_logs = logs;
+
+                // Initialize DataTables after Vue updates the DOM
+                this.$nextTick(() => {
+                    $('#logTable').DataTable(); // Target the specific table by its ID
+                });
+            } catch (error) {
+                console.error('Error fetching logs:', error);
+                alert('Error fetching logs. Please try again later.');
+            }
+        },
 
         // FUNCIONES RETIRADAS
         async get_lista_vehiculos_por_retirar() {
             try {
-                const response = await fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/vehiculos/por_retirar');
+                const response = await fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/api/vehiculos/por_retirar');
                 const vehicles = await response.json();
                 this.lista_vehiculos_por_retirar = vehicles;
             } catch (error) {
@@ -389,6 +442,7 @@ let app = new Vue({
                     });
                     console.log(await response.json());
                     this.log_create(" retirada");
+                    this.showAlert('Retirada creada correctamente', 'success');
                     this.ejecutar('retirada', 'index');
                 } catch (error) {
                     console.error('Error creating retirada:', error);
@@ -424,8 +478,15 @@ let app = new Vue({
                 this.retirada_data_check.nif = 'is-invalid';
                 check = false;
             } else {
-                this.retirada_data_check.nif_msg = 'Looks good!';
-                this.retirada_data_check.nif = 'is-valid';
+                const nifPattern = /^[0-9]{8}[A-Z]$/;
+                if (!nifPattern.test(this.retirada_selected.nif)) {
+                    this.retirada_data_check.nif_msg = 'Introduce un NIF válido.';
+                    this.retirada_data_check.nif = 'is-invalid';
+                    check = false;
+                } else {
+                    this.retirada_data_check.nif_msg = 'Looks good!';
+                    this.retirada_data_check.nif = 'is-valid';
+                }
             }
 
             if (!this.retirada_selected.domicilio) {
@@ -465,9 +526,9 @@ let app = new Vue({
             }
 
             if (!this.retirada_selected.fecha) {
-                this.retirada_data_check.fecha_msg = 'La fecha es requerida.';
-                this.retirada_data_check.fecha = 'is-invalid';
-                check = false;
+                this.retirada_selected.fecha = new Date().toISOString().slice(0, 10);
+                this.retirada_data_check.fecha_msg = 'La fecha es requerida. Se ha establecido la fecha de hoy.';
+                this.retirada_data_check.fecha = 'is-valid';
             } else {
                 this.retirada_data_check.fecha_msg = 'Looks good!';
                 this.retirada_data_check.fecha = 'is-valid';
@@ -482,13 +543,40 @@ let app = new Vue({
                 this.retirada_data_check.agente = 'is-valid';
             }
 
+            if (!this.retirada_selected.tarifa.opcion_pago) {
+                this.retirada_data_check.opcion_pago_msg = 'La opción de pago es requerida.';
+                this.retirada_data_check.opcion_pago = 'is-invalid';
+                check = false;
+            } else {
+                this.retirada_data_check.opcion_pago_msg = 'Looks good!';
+                this.retirada_data_check.opcion_pago = 'is-valid';
+            }
+
+            if (this.retirada_selected.tarifa.costo_por_hora <= 0) {
+                this.retirada_data_check.costo_por_hora_msg = 'El costo por hora debe ser mayor que 0.';
+                this.retirada_data_check.costo_por_hora = 'is-invalid';
+                check = false;
+            } else {
+                this.retirada_data_check.costo_por_hora_msg = 'Looks good!';
+                this.retirada_data_check.costo_por_hora = 'is-valid';
+            }
+
+            if (this.retirada_selected.tarifa.horas_gratis < 0) {
+                this.retirada_data_check.horas_gratis_msg = 'Las horas gratis deben ser mayores o iguales a 0.';
+                this.retirada_data_check.horas_gratis = 'is-invalid';
+                check = false;
+            } else {
+                this.retirada_data_check.horas_gratis_msg = 'Looks good!';
+                this.retirada_data_check.horas_gratis = 'is-valid';
+            }
+
             return check;
         },
 
         // FUNCIONES VEHICULOS
         async vehiculo_index() {
             try {
-                const response = await fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/vehiculos/index');
+                const response = await fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/api/vehiculos');
                 const vehicles = await response.json();
                 this.lista_vehiculos = vehicles;
             } catch (error) {
@@ -499,7 +587,7 @@ let app = new Vue({
         async vehiculo_create() {
             if(this.vehiculo_check()) {
                 try {
-                    const response = await fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/vehiculos/store', {
+                    const response = await fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/api/vehiculos', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -508,6 +596,7 @@ let app = new Vue({
                     });
                     console.log(await response.json());
                     this.log_create(" vehiculo");
+                    this.showAlert('Vehículo creado correctamente', 'success');
                     this.ejecutar('vehiculo', 'index');
                 } catch (error) {
                     console.error('Error creating vehicle:', error);
@@ -518,7 +607,7 @@ let app = new Vue({
         async vehiculo_edit() {
             if(this.vehiculo_check()) {
                 try {
-                    const response = await fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/vehiculos/update/' + this.vehiculo_selected.id, {
+                    const response = await fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/api/vehiculos/' + this.vehiculo_selected.id, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
@@ -527,6 +616,7 @@ let app = new Vue({
                     });
                     console.log(await response.json());
                     this.log_create(" vehiculo. Id: " + this.vehiculo_selected.id);
+                    this.showAlert('Vehículo actualizado correctamente', 'success');
                     this.ejecutar('vehiculo', 'index');
                 } catch (error) {
                     console.error('Error updating vehicle:', error);
@@ -536,7 +626,7 @@ let app = new Vue({
         },
         async vehiculo_delete() {
             try {
-                const response = await fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/vehiculos/delete/' + this.vehiculo_selected.id, {
+                const response = await fetch('http://localhost/Proyecto_JS_2/private/apiGrua/public/api/vehiculos/' + this.vehiculo_selected.id, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
@@ -544,6 +634,7 @@ let app = new Vue({
                 });
                 console.log(await response.json());
                 this.log_create(" vehiculo. Id: " + this.vehiculo_selected.id);
+                this.showAlert('Vehículo eliminado correctamente', 'danger');
                 this.ejecutar('vehiculo', 'index');
             } catch (error) {
                 console.error('Error deleting vehicle:', error);
@@ -603,8 +694,15 @@ let app = new Vue({
                 this.vehiculo_data_check.matricula = 'is-invalid';
                 check = false;
             } else {
-                this.vehiculo_data_check.matricula_msg = 'Looks good!';
-                this.vehiculo_data_check.matricula = 'is-valid';
+                const matriculaPattern = /^[0-9]{4}[A-Z]{3}$/;
+                if (!matriculaPattern.test(this.vehiculo_selected.matricula)) {
+                    this.vehiculo_data_check.matricula_msg = 'Introduce una matrícula válida.';
+                    this.vehiculo_data_check.matricula = 'is-invalid';
+                    check = false;
+                } else {
+                    this.vehiculo_data_check.matricula_msg = 'Looks good!';
+                    this.vehiculo_data_check.matricula = 'is-valid';
+                }
             }
 
             if (!this.vehiculo_selected.marca) {
@@ -701,6 +799,7 @@ let app = new Vue({
                     });
                     console.log(await response.json());
                     this.log_create(" usuario");
+                    this.showAlert('Usuario creado correctamente', 'success');
                     this.ejecutar('usuario', 'index');
                 } catch (error) {
                     console.error('Error creating user:', error);
@@ -720,6 +819,7 @@ let app = new Vue({
                     });
                     console.log(await response.json());
                     this.log_create(" usuario. Id: " + this.usuario_selected.id);
+                    this.showAlert('Usuario actualizado correctamente', 'success');
                     this.ejecutar('usuario', 'index');
                 } catch (error) {
                     console.error('Error updating user:', error);
@@ -736,7 +836,8 @@ let app = new Vue({
                     }
                 });
                 console.log(await response.json());       
-                this.log_create(" usuario. Id: " + this.usuario_selected.id);         
+                this.log_create(" usuario. Id: " + this.usuario_selected.id);
+                this.showAlert('Usuario eliminado correctamente', 'danger');
                 this.ejecutar('usuario', 'index');
             } catch (error) {
                 console.error('Error deleting user:', error);
@@ -787,6 +888,69 @@ let app = new Vue({
             }
 
             return check;
+        },
+        generarFacturaPDF(retirada) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+    
+            // Información inicial de la factura
+            const infoInicial = `La Policia Local ha procedido a retirar el vehiculo que más abajo se reseña, en cumplimiento de la Ordenanza Municipal Reguladora 2-07 (BOP núm. ${retirada.id} de ${retirada.vehiculo.fecha_entrada}) sobre Retirada y Depósito de vehículos de la via pública.`;
+            doc.setFontSize(10);
+            doc.text(infoInicial, 10, 10, { maxWidth: 190 });
+            // Datos del Vehículo
+            doc.text('Datos del Vehículo:', 10, 40);
+            doc.autoTable({
+                startY: 45,
+                head: [['Campo', 'Valor']],
+                body: [
+                    ['Matrícula', retirada.vehiculo.matricula],
+                    ['Marca', retirada.vehiculo.marca],
+                    ['Modelo', retirada.vehiculo.modelo],
+                    ['Lugar de Recogida', retirada.vehiculo.lugar],
+                    ['Fecha y Hora de Recogida', retirada.vehiculo.fecha_entrada]
+                ]
+            });
+    
+            // Datos de la Persona que recoge el Vehículo
+            doc.text('Datos de la Persona que recoge el Vehículo:', 10, doc.autoTable.previous.finalY + 10);
+            doc.autoTable({
+                startY: doc.autoTable.previous.finalY + 15,
+                head: [['Campo', 'Valor']],
+                body: [
+                    ['Nombre', retirada.nombre],
+                    ['NIF', retirada.nif],
+                    ['Domicilio', retirada.domicilio],
+                    ['Población', retirada.poblacion],
+                    ['Provincia', retirada.provincia],
+                    ['Permiso', retirada.permiso]
+                ]
+            });
+    
+            // Datos de Entrega
+            doc.text('Datos de Entrega:', 10, doc.autoTable.previous.finalY + 10);
+            doc.autoTable({
+                startY: doc.autoTable.previous.finalY + 15,
+                head: [['Campo', 'Valor']],
+                body: [
+                    ['Fecha y Hora', retirada.fecha],
+                    ['Agente', retirada.agente],
+                    ['Forma de Pago', retirada.tarifa.opcion_pago],
+                    ['Importe Retirada', `${retirada.tarifa.importe_retirada} €`],
+                    ['Importe Depósito', `${retirada.tarifa.importe_deposito} €`],
+                    ['Total a Pagar', `${retirada.tarifa.total} €`]
+                ]
+            });
+    
+            // Descargar el PDF
+            doc.save(`Factura_Retirada_${retirada.id}.pdf`);
+            this.showAlert('Factura descargada correctamente', 'success');
+        },
+        showAlert(message, type) {
+            this.alertType = "alert-" + type;
+            this.alertMessage = message;
+            setTimeout(() => {
+                this.alertMessage = '';
+            }, 5000); // Ocultar la alerta después de 5 segundos
         }
     }
 });

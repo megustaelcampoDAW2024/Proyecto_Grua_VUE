@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Vehiculo;
 use Illuminate\Support\Facades\DB;
@@ -21,14 +22,6 @@ class VehiculoController extends Controller
     {
         $retirada = new Vehiculo();
         return $retirada->porRetirar();
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -64,22 +57,6 @@ class VehiculoController extends Controller
         } else {
             return response()->json(['message' => 'Data not found.'], 404);
         }
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
     }
 
     /**

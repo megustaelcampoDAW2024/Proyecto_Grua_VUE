@@ -12,34 +12,52 @@
         <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
         <!-- JS app -->
         <script src="app.js" defer></script>
+        <!-- CDN PDF -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+        <!-- JQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- DataTables CSS -->
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+        <!-- DataTables JS -->
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
         <title>Proyecto VUE</title>
     </head>
     <body>
         <div id="app">
-            <div v-if="!loggedIn" class="container mt-5">
-                <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input type="text" id="email" v-model="email_input" class="form-control" autofocus>
+            <div v-if="!loggedIn" class="container mt-5 d-flex justify-content-center">
+                <div class="card p-4 shadow" style="width: 400px;">
+                    <div class="card-body">
+                        <h3 class="card-title text-center mb-4">Login</h3>
+                        <div class="form-group">
+                            <label for="email">Email:</label>
+                            <input type="text" id="email" v-model="email_input" class="form-control" autofocus>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password:</label>
+                            <input type="password" id="password" v-model="password_input" class="form-control">
+                        </div>
+                        <button type="submit" @click="login" class="btn btn-primary btn-block">Login</button>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" v-model="password_input" class="form-control">
-                </div>
-                <button type="submit" @click="login" class="btn btn-primary">Login</button>
             </div>
             <div v-else>
-                <div id="plantilla">
+                <div id="plantilla" class="mb-5 pb-5">
                     <!-- NAV -->
                     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
                         <ul class="navbar-nav mr-auto">
-                            <li class="nav-item" v-if="isAdmin">
+                            <li class="nav-item">
                                 <button class="nav-link btn btn-link" @click="ejecutar('vehiculo', 'index')">Vehículos</button>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item" v-if="isAdmin === 'true'">
                                 <button class="nav-link btn btn-link" @click="ejecutar('retirada', 'index')">Retiradas</button>
                             </li>
-                            <li class="nav-item" v-if="isAdmin">
+                            <li class="nav-item" v-if="isAdmin === 'true'">
                                 <button class="nav-link btn btn-link" @click="ejecutar('usuario', 'index')">Gestión Usuarios</button>
+                            </li>
+                            <li class="nav-item" v-if="isAdmin === 'true'">
+                                <button class="nav-link btn btn-link" @click="ejecutar('log', 'index')">Logs</button>
                             </li>
                         </ul>
                         <div>
@@ -48,6 +66,11 @@
                         </div>
                     </nav>
 
+                    <!-- ALERTS -->
+                    <div v-if="alertMessage" class="alert mx-5" v-bind:class="alertType" role="alert">
+                        {{ alertMessage }}
+                    </div>
+
                     <!-- SECTION -->
                     <section>
 
@@ -55,17 +78,49 @@
                         <article v-if="pantalla == 'inicio'">
 
                             <!-- INDEX -->
-                             <div class="container">
-                                 <h2>Bienvenido a la gestión de la Grua Municipal</h2>
-                             </div>
+                            <div class="container text-center mt-5">
+                                <h1 class="display-4">Bienvenido a la gestión de la Grua Municipal</h1>
+                                <p class="lead">Gestiona vehículos, retiradas, usuarios y más de manera eficiente.</p>
+                                <hr class="my-4">
+                                <p>Utiliza el menú de navegación para acceder a las diferentes secciones de la aplicación.</p>
+                                <a class="btn btn-primary btn-lg" href="#" role="button" @click="ejecutar('vehiculo', 'index')">Gestionar Vehículos</a>
+                                <a class="btn btn-secondary btn-lg" href="#" role="button" @click="ejecutar('retirada', 'index')" v-if="isAdmin === 'true'">Gestionar Retiradas</a>
+                                <a class="btn btn-success btn-lg" href="#" role="button" @click="ejecutar('usuario', 'index')" v-if="isAdmin === 'true'">Gestionar Usuarios</a>
+                            </div>
                              
+                        </article>
+
+                        <!-- LOGS -->
+                        <article v-if="pantalla == 'log'">
+                            
+                            <!-- INDEX -->
+                            <div class="container" v-if="accion == 'index'">
+                                <table id="logTable" class="table table-striped table-bordered">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Usuario ID</th>
+                                            <th>Accion</th>
+                                            <th>Fecha</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="log in lista_logs">
+                                            <td>{{log.id}}</td>
+                                            <td>{{log.usuario_id}}</td>
+                                            <td>{{log.accion}}</td>
+                                            <td>{{log.fecha}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </article>
 
                         <!-- RETIRADAS -->
                         <article v-if="pantalla == 'retirada'">
                                 
                             <!-- INDEX -->
-                            <div class="container" v-if="accion == 'index'">
+                            <div class="p-3" v-if="accion == 'index'">
                                 <table class="table table-striped table-bordered">
                                     <thead class="thead-dark">
                                         <tr>
@@ -86,9 +141,9 @@
                                     <tbody>
                                         <tr v-for="retirada in lista_retiradas">
                                             <td>T_2025_{{retirada.id_tarifa}}</td>
-                                            <td>2025_{{retirada.id_vehiculos}}</td>
+                                            <td>M_2025_{{retirada.id_vehiculos}}</td>
                                             <td>
-                                                <button class="btn" 
+                                                <button class="btn w-100" 
                                                     :class="{
                                                         'btn-primary': retirada.vehiculo.tipo_vehiculo === 'A', 
                                                         'btn-secondary': retirada.vehiculo.tipo_vehiculo === 'B', 
@@ -102,6 +157,34 @@
                                                     Tipo_{{ retirada.vehiculo.tipo_vehiculo }}
                                                 </button>
                                             </td>
+
+                                            <!-- Modal -->
+                                            <div class="modal fade" id="tipoVehiculoModal" tabindex="-1" role="dialog" aria-labelledby="tipoVehiculoModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="tipoVehiculoModalLabel">Guía de Tipos de Vehículos</h5>
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <ul>
+                                                                <li><strong>Tipo A:</strong> Motocicleta, aperos, motocarros y similares -> 25€</li>
+                                                                <li><strong>Tipo B:</strong> Turismo &lt; 12cv o Remolques &lt; 750kg -> 100€</li>
+                                                                <li><strong>Tipo C:</strong> Turismos &gt; 12cv o Remolques &gt; 750kg -> 130€</li>
+                                                                <li><strong>Tipo D:</strong> Vehículos especiales -> 150€</li>
+                                                                <li><strong>Tipo E:</strong> Vehículos de cortesía -> 0€</li>
+                                                                <li><strong>Tipo F:</strong> Chatarra -> 0€</li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             <td>{{retirada.nombre}}</td>
                                             <td>{{retirada.nif}}</td>
                                             <td>{{retirada.domicilio}}</td>
@@ -110,14 +193,13 @@
                                             <td>{{retirada.permiso}}</td>
                                             <td>{{retirada.fecha}}</td>
                                             <td>{{retirada.agente}}</td>
-                                            <td class="p-1">
-                                                <button class="btn btn-warning" @click="ejecutar('retirada', 'edit', retirada.id)">E</button>
-                                                <button class="btn btn-danger" @click="ejecutar('retirada', 'delete', retirada.id)">D</button>
+                                            <td class="d-flex justify-content-around align-items-center">
+                                                <button class="btn btn-primary" @click="generarFacturaPDF(retirada)">Descargar Factura</button>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td colspan="12">
-                                                <button class="btn btn-success w-100" @click="ejecutar('retirada', 'create')">Nuevo vehiculo</button>
+                                                <button class="btn btn-success w-100" @click="ejecutar('retirada', 'create')">Retirar Vehículo</button>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -133,7 +215,7 @@
                                         <div class="form-group">
                                             <label for="id_vehiculos">Vehículo:</label>
                                             <select id="id_vehiculos" v-model="retirada_selected.id_vehiculos" class="form-control" :class="retirada_data_check.id_vehiculos">
-                                                <option v-for="vehiculo in lista_vehiculos_por_retirar" :value="vehiculo.id">{{vehiculo.matricula}}</option>
+                                                <option v-for="vehiculo in lista_vehiculos_por_retirar" :value="vehiculo.id" :selected="retirada_selected.id_vehiculos === vehiculo.id">{{vehiculo.matricula}}</option>
                                             </select>
                                             <div class="invalid-feedback">
                                                 {{retirada_data_check.id_vehiculos_msg}}
@@ -239,23 +321,39 @@
                                     <div class="form-group">
                                         <div class="form-group">
                                             <label for="opcion_pago">Opción de Pago:</label>
-                                            <select id="opcion_pago" v-model="retirada_selected.tarifa.opcion_pago" class="form-control">
+                                            <select id="opcion_pago" v-model="retirada_selected.tarifa.opcion_pago" class="form-control" :class="retirada_data_check.opcion_pago">
                                                 <option value="metalico">Metálico</option>
                                                 <option value="tarjeta">Tarjeta</option>
                                                 <option value="bizum">Bizum</option>
                                             </select>
+                                            <div class="invalid-feedback">
+                                                {{retirada_data_check.opcion_pago_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{retirada_data_check.opcion_pago_msg}}
+                                            </div>
                                         </div>
                                         
                                         <div class="form-group">
                                             <label for="horas_gratis">Horas Gratis:</label>
-                                            <input type="number" id="horas_gratis" v-model="retirada_selected.tarifa.horas_gratis" class="form-control">
+                                            <input type="number" id="horas_gratis" v-model="retirada_selected.tarifa.horas_gratis" class="form-control" :class="retirada_data_check.horas_gratis">
                                             <div class="invalid-feedback">
+                                                {{retirada_data_check.horas_gratis_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{retirada_data_check.horas_gratis_msg}}
+                                            </div>
                                         </div>
 
                                         <div class="form-group">
                                             <label for="costo_por_hora">Costo por Hora:</label>
-                                            <input type="number" id="costo_por_hora" v-model="retirada_selected.tarifa.costo_por_hora" class="form-control">
+                                            <input type="number" id="costo_por_hora" v-model="retirada_selected.tarifa.costo_por_hora" class="form-control" :class="retirada_data_check.costo_por_hora">
                                             <div class="invalid-feedback">
+                                                {{retirada_data_check.costo_por_hora_msg}}
+                                            </div>
+                                            <div class="valid-feedback">
+                                                {{retirada_data_check.costo_por_hora_msg}}
+                                            </div>
                                         </div>
                                         
                                         <hr>
@@ -273,7 +371,7 @@
                                         </div>
                                     </div>
                                 </fieldset>
-
+                                <br>
                                 <button class="btn btn-secondary" @click="ejecutar('retirada', 'index')">Cancelar</button>
                                 <button class="btn btn-success" @click="retirada_create()">Guardar</button>
                             </div>
@@ -326,7 +424,7 @@
                                     </thead>
                                     <tbody>
                                         <tr v-for="vehiculo in vehiculosFiltrados">
-                                            <td>2025_{{vehiculo.id}}</td>
+                                            <td>M_2025_{{vehiculo.id}}</td>
                                             <td>{{vehiculo.fecha_entrada}}</td>
                                             <td>{{vehiculo.fecha_salida}}</td>
                                             <td>{{vehiculo.lugar}}</td>
@@ -338,7 +436,7 @@
                                             <td>{{vehiculo.color}}</td>
                                             <td>{{vehiculo.motivo}}</td>
                                             <td>
-                                                <button class="btn" 
+                                                <button class="btn w-100" 
                                                     :class="{
                                                         'btn-primary': vehiculo.tipo_vehiculo === 'A', 
                                                         'btn-secondary': vehiculo.tipo_vehiculo === 'B', 
@@ -381,11 +479,12 @@
                                             </div>
                                             <td>{{vehiculo.grua}}</td>
                                             <td>
-                                                <span :class="{'badge bg-secondary text-white w-100 px-1': vehiculo.estado === 'En deposito', 'badge bg-success text-white w-100': vehiculo.estado === 'Liquidado'}" style="padding: 13px 0px">{{vehiculo.estado}}</span>
+                                                <span v-if="vehiculo.estado === 'Liquidado'" class="btn btn-success w-100">{{vehiculo.estado}}</span>
+                                                <button v-else class="btn btn-secondary w-100" @click="ejecutar('retirada', 'create', vehiculo.id)">Retirar</button>
                                             </td>
-                                            <td class="p-1">
-                                                <button class="btn btn-warning" @click="ejecutar('vehiculo', 'edit', vehiculo.id)">E</button>
-                                                <button class="btn btn-danger" @click="ejecutar('vehiculo', 'delete', vehiculo.id)">D</button>
+                                            <td class="d-flex justify-content-around align-items-center">
+                                                <button class="btn btn-warning" @click="ejecutar('vehiculo', 'edit', vehiculo.id)">Editar</button>
+                                                <button class="btn btn-danger" @click="ejecutar('vehiculo', 'delete', vehiculo.id)">Delete</button>
                                             </td>
                                             <tr>
                                                 <td colspan="15">
@@ -762,7 +861,7 @@
                                             <td>{{usuario.email}}</td>
                                             <td>{{usuario.password}}</td>
                                             <td>{{usuario.rol}}</td>
-                                            <td>
+                                            <td class="d-flex justify-content-around align-items-center">
                                                 <button class="btn btn-warning" @click="ejecutar('usuario', 'edit', usuario.id)">Editar</button>
                                                 <button class="btn btn-danger" @click="ejecutar('usuario', 'delete', usuario.id)">Eliminar</button>
                                             </td>
@@ -885,8 +984,8 @@
                     </section>
 
                     <!-- FOOTER -->
-                    <footer class="mt-4 bg-light text-center py-3">
-                        <p class="mb-0">&copy; 2025 Grua Municipal. All rights reserved.</p>
+                    <footer class="bg-light text-center fixed-bottom mt-5 py-4">
+                        <p class="m-0">&copy; 2025 Grua Municipal. All rights reserved.</p>
                     </footer>
                 </div>
             </div>
